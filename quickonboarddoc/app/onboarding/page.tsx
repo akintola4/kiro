@@ -13,9 +13,17 @@ import { IconSkull } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { LoadingPage, LoadingButton } from "@/components/ui/loading";
 
-export default function OnboardingPage() {
+function OnboardingContent() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  
+  const session = useSession();
+  const status = session?.status;
+  const sessionData = session?.data;
   const [workspaceName, setWorkspaceName] = useState("");
   const [companyId, setCompanyId] = useState("");
   const [description, setDescription] = useState("");
@@ -57,6 +65,11 @@ export default function OnboardingPage() {
     }
   };
 
+  // Always show loading during SSR and initial mount
+  if (!mounted) {
+    return <LoadingPage />;
+  }
+  
   if (status === "loading" || !isReady) {
     return <LoadingPage />;
   }
@@ -126,3 +139,11 @@ export default function OnboardingPage() {
     </div>
   );
 }
+
+export default function OnboardingPage() {
+  return <OnboardingContent />;
+}
+
+// Prevent static generation
+export const dynamic = "force-dynamic";
+export const dynamicParams = true;

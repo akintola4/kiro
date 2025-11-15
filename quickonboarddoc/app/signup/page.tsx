@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
@@ -13,7 +13,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { LoadingPage, LoadingButton } from "@/components/ui/loading";
 
-export default function SignupPage() {
+function SignupContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/onboarding";
@@ -158,5 +158,13 @@ export default function SignupPage() {
         </Card>
       </motion.div>
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<LoadingPage />}>
+      <SignupContent />
+    </Suspense>
   );
 }
