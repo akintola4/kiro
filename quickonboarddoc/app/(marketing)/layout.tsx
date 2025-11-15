@@ -1,6 +1,9 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "https://quickonboarddoc.vercel.app"
+  ),
   title: "QuickOnboardDoc - AI-Powered Employee Onboarding Platform",
   description:
     "Streamline your employee onboarding with AI-powered document chat. Get instant answers from company docs using advanced RAG technology. Free forever, no credit card required.",

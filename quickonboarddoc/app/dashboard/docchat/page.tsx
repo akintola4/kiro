@@ -16,6 +16,8 @@ type Message = {
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
+  confidence?: number;
+  sources?: string[];
 };
 
 export default function DocChatPage() {
@@ -60,6 +62,8 @@ export default function DocChatPage() {
           role: "assistant",
           content: data.response,
           timestamp: new Date(),
+          confidence: data.confidence,
+          sources: data.sources,
         },
       ]);
     },
@@ -158,20 +162,40 @@ export default function DocChatPage() {
                 }`}
               >
                 {message.role === "assistant" && (
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <IconRobot className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                    <Ghost className="w-4 h-4 sm:w-5 sm:h-5 text-foreground" />
                   </div>
                 )}
                 <Card
                   className={`max-w-[85%] sm:max-w-[75%] p-3 sm:p-4 ${
                     message.role === "user"
                       ? "bg-primary text-primary-foreground"
-                      : "bg-card"
+                      : "bg-muted/80 border-border/50"
                   }`}
                 >
-                  <p className="text-xs sm:text-sm whitespace-pre-wrap">{message.content}</p>
-                  <p className="text-[10px] sm:text-xs opacity-60 mt-1 sm:mt-2">
-                    {message.timestamp.toLocaleTimeString()}
+                  <p className="text-xs sm:text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                  
+                  {message.role === "assistant" && message.id !== "welcome" && (message.confidence || message.sources) && (
+                    <div className="mt-3 pt-3 border-t border-border/50">
+                      <div className="flex items-center gap-2 text-[10px] sm:text-xs text-muted-foreground flex-wrap">
+                        {message.confidence && (
+                          <>
+                            <span className="font-semibold text-foreground">
+                              Confidence: {Math.min(100, Math.round(message.confidence > 1 ? message.confidence : message.confidence * 100))}%
+                            </span>
+                            {message.sources && message.sources.length > 0 && <span>•</span>}
+                          </>
+                        )}
+                        {message.sources && message.sources.length > 0 && (
+                          <span>Source: {message.sources.join(", ")}</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
+                  <p className="text-[10px] sm:text-xs text-muted-foreground mt-2 text-right">
+                    {message.role === "assistant" ? "AI Assistant • " : ""}
+                    {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </Card>
                 {message.role === "user" && (

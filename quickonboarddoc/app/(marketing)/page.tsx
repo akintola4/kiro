@@ -165,7 +165,7 @@ export default function HomePage() {
 
           {/* Subtitle */}
           <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-            <span className="font-semibold text-foreground">QuickOnboardDoc:</span> The all-in-one AI assistant for new hire onboarding
+            <span className="font-semibold text-foreground">QuickOnboardDoc:</span> The all in one AI assistant for new hire onboarding
           </p>
 
           {/* CTA Buttons */}
