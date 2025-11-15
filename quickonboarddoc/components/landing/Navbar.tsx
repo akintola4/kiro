@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Ghost, Menu, X } from "lucide-react";
@@ -18,6 +19,7 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { data: session, status } = useSession();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -67,16 +69,26 @@ export function Navbar() {
         {/* Right - Actions */}
         <div className="flex gap-2 items-center ml-auto">
           <ModeToggle />
-          <Link href="/login" className="hidden sm:block">
-            <Button variant="ghost" size="sm" className="rounded-full">
-              Login
-            </Button>
-          </Link>
-          <Link href="/signup" className="hidden md:block">
-            <Button size="sm" className="rounded-full">
-              Get Started
-            </Button>
-          </Link>
+          {status === "authenticated" ? (
+            <Link href="/dashboard/home">
+              <Button size="sm" className="rounded-full">
+                Launch App
+              </Button>
+            </Link>
+          ) : (
+            <>
+              <Link href="/login" className="hidden sm:block">
+                <Button variant="ghost" size="sm" className="rounded-full">
+                  Login
+                </Button>
+              </Link>
+              <Link href="/signup" className="hidden md:block">
+                <Button size="sm" className="rounded-full">
+                  Get Started
+                </Button>
+              </Link>
+            </>
+          )}
 
           {/* Mobile Menu */}
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -110,16 +122,26 @@ export function Navbar() {
                 </div>
 
                 <div className="flex flex-col gap-2 mt-4 pt-4 border-t">
-                  <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="ghost" className="w-full rounded-full">
-                      Login
-                    </Button>
-                  </Link>
-                  <Link href="/signup" onClick={() => setMobileMenuOpen(false)}>
-                    <Button className="w-full rounded-full">
-                      Get Started
-                    </Button>
-                  </Link>
+                  {status === "authenticated" ? (
+                    <Link href="/dashboard/home" onClick={() => setMobileMenuOpen(false)}>
+                      <Button className="w-full rounded-full">
+                        Launch App
+                      </Button>
+                    </Link>
+                  ) : (
+                    <>
+                      <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                        <Button variant="ghost" className="w-full rounded-full">
+                          Login
+                        </Button>
+                      </Link>
+                      <Link href="/signup" onClick={() => setMobileMenuOpen(false)}>
+                        <Button className="w-full rounded-full">
+                          Get Started
+                        </Button>
+                      </Link>
+                    </>
+                  )}
                 </div>
               </div>
             </SheetContent>

@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -54,5 +55,5 @@ export default function MarketingLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return <SessionProvider>{children}</SessionProvider>;
 }
