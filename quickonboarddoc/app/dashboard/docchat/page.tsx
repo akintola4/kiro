@@ -133,6 +133,12 @@ export default function DocChatPage() {
     setMessages((prev) => [...prev, userMessage]);
     chatMutation.mutate(input);
     setInput("");
+    
+    // Reset textarea height
+    const textarea = document.querySelector('textarea');
+    if (textarea) {
+      textarea.style.height = "auto";
+    }
   };
 
   if (isLoading) {
@@ -140,16 +146,9 @@ export default function DocChatPage() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] lg:h-screen">
-      {/* <div className="border-b border-border p-4 sm:p-6 bg-background flex-shrink-0">
-        <h1 className="text-xl sm:text-2xl font-bold">Document Chat</h1>
-        <p className="text-xs sm:text-sm text-muted-foreground">
-          Ask questions about your company documentation
-        </p>
-      </div> */}
-
-      <div className="flex-1 overflow-auto p-3 sm:p-4 md:p-6">
-        <div className="max-w-4xl mx-auto space-y-3 sm:space-y-4 pb-32">
+    <div className="flex flex-col h-full relative">
+      <div className="flex-1 p-3 sm:p-4 md:p-6 pb-40 md:pb-48">
+        <div className="max-w-4xl mx-auto space-y-3 sm:space-y-4 min-h-full flex flex-col justify-end">
           <AnimatePresence>
             {messages.map((message) => (
               <motion.div
@@ -167,10 +166,10 @@ export default function DocChatPage() {
                   </div>
                 )}
                 <Card
-                  className={`max-w-[85%] sm:max-w-[75%] p-3 sm:p-4 ${
+                  className={`max-w-[85%] rounded-2xl  sm:max-w-[75%] p-3 sm:p-4 ${
                     message.role === "user"
                       ? "bg-primary text-primary-foreground"
-                      : "bg-muted/80 border-border/50"
+                      : "bg-muted/80  border-border/50"
                   }`}
                 >
                   <p className="text-xs sm:text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
@@ -228,7 +227,7 @@ export default function DocChatPage() {
       </div>
 
       {/* Floating Input */}
-      <div className="absolute bottom-3 sm:bottom-4 md:bottom-6 left-3 right-3 sm:left-4 sm:right-4 md:left-20 md:right-6">
+      <div className="fixed bottom-0 left-0 right-0 lg:left-64 p-3 sm:p-4 md:p-6  z-10">
         <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
           <div className="flex gap-1 sm:gap-2 items-center px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 md:py-3 rounded-full bg-muted/50 border border-border/50 hover:border-border transition-colors shadow-lg backdrop-blur-sm">
             <Button 
@@ -265,17 +264,26 @@ export default function DocChatPage() {
               </Button>
             </label>
 
-            <input
-              type="text"
+            <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask me something..."
-              className="flex-1 bg-transparent border-0 outline-none text-xs sm:text-sm placeholder:text-muted-foreground px-1 sm:px-2"
+              rows={1}
+              style={{
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+              }}
+              className="flex-1 bg-transparent border-0 outline-none text-xs sm:text-sm placeholder:text-muted-foreground px-1 sm:px-2 resize-none max-h-32 overflow-y-auto [&::-webkit-scrollbar]:hidden"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
                   handleSubmit(e);
                 }
+              }}
+              onInput={(e) => {
+                const target = e.target as HTMLTextAreaElement;
+                target.style.height = "auto";
+                target.style.height = target.scrollHeight + "px";
               }}
             />
 
