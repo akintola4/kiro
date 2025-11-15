@@ -35,10 +35,19 @@ function OnboardingContent() {
       router.push("/login");
     } else if (status === "authenticated") {
       // Check if user already has a workspace
-      fetch("/api/workspace")
-        .then((res) => res.json())
+      fetch("/api/workspace/info", {
+        credentials: "include",
+      })
+        .then((res) => {
+          if (res.status === 404 || res.status === 401) {
+            // No workspace found or unauthorized, show onboarding form
+            setIsReady(true);
+            return null;
+          }
+          return res.json();
+        })
         .then((data) => {
-          if (data.workspace) {
+          if (data?.workspace) {
             // User already has a workspace, redirect to dashboard
             router.push("/dashboard/home");
           } else {

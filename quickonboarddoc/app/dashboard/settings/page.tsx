@@ -40,7 +40,7 @@ export default function SettingsPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["workspace"],
     queryFn: async () => {
-      const response = await fetch("/api/workspace");
+      const response = await fetch("/api/workspace/info");
       if (!response.ok) throw new Error("Failed to fetch workspace");
       return response.json();
     },
@@ -48,7 +48,7 @@ export default function SettingsPage() {
 
   const updateWorkspaceMutation = useMutation({
     mutationFn: async ({ name, description }: { name: string; description: string }) => {
-      const response = await fetch("/api/workspace", {
+      const response = await fetch("/api/workspace/info", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, description }),
@@ -68,7 +68,7 @@ export default function SettingsPage() {
 
   const deleteWorkspaceMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch("/api/workspace", {
+      const response = await fetch("/api/workspace/info", {
         method: "DELETE",
       });
       if (!response.ok) throw new Error("Failed to delete workspace");
