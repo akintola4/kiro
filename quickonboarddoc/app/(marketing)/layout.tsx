@@ -29,6 +29,14 @@ export const metadata: Metadata = {
     description:
       "Streamline employee onboarding with AI. Get instant answers from company docs using advanced RAG technology.",
     siteName: "QuickOnboardDoc",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 500,
+        alt: "QuickOnboardDoc - AI-Powered Employee Onboarding Platform",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -36,6 +44,7 @@ export const metadata: Metadata = {
     description:
       "Streamline employee onboarding with AI. Get instant answers from company docs.",
     creator: "@photofola",
+    images: ["/og-image.png"],
   },
   robots: {
     index: true,
