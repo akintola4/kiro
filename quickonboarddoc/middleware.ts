@@ -1,42 +1,13 @@
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 
-export default auth(async (req) => {
-  const pathname = req.nextUrl.pathname;
-  
+export default auth((req) => {
   // Allow all API routes to pass through without auth check
-  if (pathname.startsWith("/api/")) {
+  if (req.nextUrl.pathname.startsWith("/api/")) {
     return NextResponse.next();
   }
   
-  // Check if user is authenticated
-  const session = req.auth;
-  
-  // If accessing dashboard or onboarding, check for workspace
-  if (session?.user?.id && (pathname.startsWith("/dashboard") || pathname === "/onboarding")) {
-    // Check if user has a workspace
-    const workspace = await prisma.workspace.findFirst({
-      where: {
-        members: {
-          some: {
-            userId: session.user.id,
-          },
-        },
-      },
-    });
-    
-    // If no workspace and not already on onboarding, redirect to onboarding
-    if (!workspace && pathname !== "/onboarding") {
-      return NextResponse.redirect(new URL("/onboarding", req.url));
-    }
-    
-    // If has workspace and on onboarding, redirect to dashboard
-    if (workspace && pathname === "/onboarding") {
-      return NextResponse.redirect(new URL("/dashboard/home", req.url));
-    }
-  }
-  
+  // For non-API routes, use the default auth behavior
   return NextResponse.next();
 });
 

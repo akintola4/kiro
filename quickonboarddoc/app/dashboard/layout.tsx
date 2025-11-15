@@ -5,6 +5,7 @@ import { AppSidebar } from "@/components/dashboard/AppSidebar";
 import { MobileSidebar } from "@/components/dashboard/MobileSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { DashboardNavbar } from "@/components/dashboard/DashboardNavbar";
+import { prisma } from "@/lib/prisma";
 
 export default async function DashboardLayout({
   children,
@@ -15,6 +16,22 @@ export default async function DashboardLayout({
 
   if (!session) {
     redirect("/login");
+  }
+
+  // Check if user has a workspace
+  const workspace = await prisma.workspace.findFirst({
+    where: {
+      members: {
+        some: {
+          userId: session.user.id,
+        },
+      },
+    },
+  });
+
+  // Redirect to onboarding if no workspace
+  if (!workspace) {
+    redirect("/onboarding");
   }
 
   return (

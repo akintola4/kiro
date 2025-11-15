@@ -34,8 +34,22 @@ function OnboardingContent() {
     if (status === "unauthenticated") {
       router.push("/login");
     } else if (status === "authenticated") {
-      // Wait a bit to ensure session is fully loaded
-      setTimeout(() => setIsReady(true), 500);
+      // Check if user already has a workspace
+      fetch("/api/workspace")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.workspace) {
+            // User already has a workspace, redirect to dashboard
+            router.push("/dashboard/home");
+          } else {
+            // No workspace, show onboarding form
+            setIsReady(true);
+          }
+        })
+        .catch(() => {
+          // If error, assume no workspace and show form
+          setIsReady(true);
+        });
     }
   }, [status, router]);
 
