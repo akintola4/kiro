@@ -240,12 +240,13 @@ export default function HomePage() {
           transition={{ delay: 0.6, duration: 0.8 }}
           className="relative max-w-6xl mx-auto mb-32"
         >
-          <div className="rounded-3xl overflow-hidden border border-border/50 bg-card p-8 md:p-16">
-            <div className="aspect-video rounded-2xl bg-muted/50 border border-border shadow-xl flex items-center justify-center">
-              <div className="text-center">
-                <IconSkull className="w-24 h-24 text-primary mx-auto mb-4 opacity-50" />
-                <p className="text-muted-foreground">App Preview</p>
-              </div>
+          <div className="rounded-3xl overflow-hidden border border-border/50 bg-card p-4 md:p-8">
+            <div className="aspect-video rounded-2xl overflow-hidden border border-border shadow-2xl">
+              <img
+                src="/app-preview.webp"
+                alt="QuickOnboardDoc AI Chat Interface - showing AI assistant responding to employee questions with confidence scores and source citations"
+                className="w-full h-full object-cover object-top"
+              />
             </div>
           </div>
         </motion.div>
