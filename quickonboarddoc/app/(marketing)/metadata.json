@@ -1,0 +1,31 @@
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "QuickOnboardDoc",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "description": "AI-powered employee onboarding platform that provides instant answers from company documentation using advanced RAG technology.",
+  "featureList": [
+    "AI-Powered Document Chat",
+    "Retrieval-Augmented Generation (RAG)",
+    "Multi-Workspace Support",
+    "Secure Authentication",
+    "Document Management",
+    "Real-time Responses"
+  ],
+  "screenshot": "https://quickonboarddoc.vercel.app/og-image.png",
+  "author": {
+    "@type": "Person",
+    "name": "Dev Akintola",
+    "url": "https://x.com/photofola"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "QuickOnboardDoc, Inc."
+  }
+}

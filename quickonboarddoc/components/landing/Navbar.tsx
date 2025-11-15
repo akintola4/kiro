@@ -3,20 +3,21 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/mode-toggle";
-import { Ghost } from "lucide-react";
+import { Ghost, Menu, X } from "lucide-react";
 import Link from "next/link";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const navLinks = [
   { href: "/#home", label: "Home" },
   { href: "/#about", label: "About" },
   { href: "/faq", label: "FAQ" },
-  { href: "/#pricing", label: "Pricing" },
-    { href: "/#contact", label: "Contact" },
+  { href: "/#contact", label: "Contact" },
 ];
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -39,7 +40,18 @@ export function Navbar() {
       }`}
     >
       <nav className="flex items-center justify-between px-4 lg:px-6">
-        {/* Left - Navigation Links */}
+        {/* Logo - Left on mobile, center on desktop */}
+        <Link
+          href="/"
+          className="flex items-center gap-2 group md:absolute md:left-1/2 md:-translate-x-1/2"
+        >
+          <Ghost className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
+          <span className="font-bold text-lg text-foreground hidden lg:block">
+            QuickOnboard
+          </span>
+        </Link>
+
+        {/* Left - Navigation Links (hidden on mobile) */}
         <div className="hidden md:flex items-center gap-1">
           {navLinks.map((link) => (
             <a
@@ -52,17 +64,6 @@ export function Navbar() {
           ))}
         </div>
 
-        {/* Center - Logo */}
-        <Link
-          href="/"
-          className="flex items-center gap-2 group absolute left-1/2 -translate-x-1/2"
-        >
-          <Ghost className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
-          <span className="font-bold text-lg text-foreground hidden lg:block">
-            QuickOnboard
-          </span>
-        </Link>
-
         {/* Right - Actions */}
         <div className="flex gap-2 items-center ml-auto">
           <ModeToggle />
@@ -71,11 +72,58 @@ export function Navbar() {
               Login
             </Button>
           </Link>
-          <Link href="/signup">
+          <Link href="/signup" className="hidden md:block">
             <Button size="sm" className="rounded-full">
               Get Started
             </Button>
           </Link>
+
+          {/* Mobile Menu */}
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild className="md:hidden">
+              <Button variant="ghost" size="sm" className="rounded-full">
+                <Menu className="w-5 h-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+              <div className="flex flex-col gap-6 mt-8">
+                <Link
+                  href="/"
+                  className="flex items-center gap-2 mb-4"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Ghost className="w-6 h-6 text-primary" />
+                  <span className="font-bold text-lg">QuickOnboard</span>
+                </Link>
+
+                <div className="flex flex-col gap-2">
+                  {navLinks.map((link) => (
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="px-4 py-3 text-base font-medium text-foreground/70 hover:text-foreground hover:bg-accent rounded-lg transition-colors"
+                    >
+                      {link.label}
+                    </a>
+                  ))}
+                </div>
+
+                <div className="flex flex-col gap-2 mt-4 pt-4 border-t">
+                  <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full rounded-full">
+                      Login
+                    </Button>
+                  </Link>
+                  <Link href="/signup" onClick={() => setMobileMenuOpen(false)}>
+                    <Button className="w-full rounded-full">
+                      Get Started
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </nav>
     </header>

@@ -50,7 +50,7 @@ function ContactSection() {
   };
 
   return (
-    <section id="contact" className="py-20 scroll-mt-20">
+    <section id="contact" className="py-20 scroll-mt-20" aria-labelledby="contact-heading">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -59,47 +59,56 @@ function ContactSection() {
         className="max-w-2xl mx-auto"
       >
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4">Get in Touch</h2>
+          <h2 id="contact-heading" className="text-4xl font-bold mb-4">Get in Touch</h2>
           <p className="text-lg text-muted-foreground">
             Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
           </p>
         </div>
 
         <div className="rounded-3xl border border-border bg-card p-8 sm:p-12">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6" aria-label="Contact form">
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="contact-name">Name</Label>
               <Input
-                id="name"
+                id="contact-name"
+                name="name"
                 type="text"
                 placeholder="Your name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
+                aria-label="Your full name"
+                aria-required="true"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="contact-email">Email</Label>
               <Input
-                id="email"
+                id="contact-email"
+                name="email"
                 type="email"
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                aria-label="Your email address"
+                aria-required="true"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="message">Message</Label>
+              <Label htmlFor="contact-message">Message</Label>
               <Textarea
-                id="message"
+                id="contact-message"
+                name="message"
                 placeholder="Tell us how we can help..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 required
                 rows={6}
+                aria-label="Your message"
+                aria-required="true"
               />
             </div>
 
@@ -124,9 +133,9 @@ export default function HomePage() {
       <Navbar />
       <FloatingGhost />
 
-      <main className="container mx-auto px-4 pt-32 pb-20">
+      <main className="container mx-auto px-4 pt-32 pb-20" role="main">
         {/* Home Section */}
-        <section id="home">
+        <section id="home" aria-labelledby="hero-heading">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -145,7 +154,7 @@ export default function HomePage() {
           </motion.div>
 
           {/* Hero Title */}
-          <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight">
+          <h1 id="hero-heading" className="text-6xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight">
             Onboard with{" "}
             <span className="text-primary">
               superpowers
@@ -161,7 +170,7 @@ export default function HomePage() {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
-            <Link href="/signup">
+            <Link href="/signup" aria-label="Sign up for free account">
               <Button size="lg" className="text-lg px-8 h-14 rounded-full">
                 Sign up, It's FREE!
               </Button>
@@ -170,6 +179,7 @@ export default function HomePage() {
               href="https://www.youtube.com/@DevAkintola"
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="Watch demo video on YouTube"
             >
               <Button
                 variant="outline"
@@ -180,6 +190,7 @@ export default function HomePage() {
                   className="w-5 h-5 mr-2"
                   viewBox="0 0 24 24"
                   fill="currentColor"
+                  aria-hidden="true"
                 >
                   <path d="M8 5v14l11-7z" />
                 </svg>
@@ -256,7 +267,7 @@ export default function HomePage() {
           ))}
         </div>
 {/* About Section */}
-        <section id="about" className="py-20 scroll-mt-20">
+        <section id="about" className="py-20 scroll-mt-20" aria-labelledby="about-heading">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -267,7 +278,7 @@ export default function HomePage() {
             <div className="mb-4">
               <span className="text-sm font-semibold text-primary">AI-Powered Onboarding</span>
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 max-w-3xl">
+            <h2 id="about-heading" className="text-4xl md:text-5xl font-bold mb-6 max-w-3xl">
               Instant answers from your company docs
             </h2>
             <p className="text-lg text-muted-foreground mb-8 max-w-2xl">
@@ -514,7 +525,7 @@ export default function HomePage() {
         
 
         {/* Pricing/CTA Section */}
-        <section id="pricing" className="py-20 scroll-mt-20">
+        <section id="pricing" className="py-20 scroll-mt-20" aria-labelledby="pricing-heading">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -523,7 +534,7 @@ export default function HomePage() {
             className="max-w-6xl mx-auto"
           >
             <div className="rounded-3xl border border-border bg-card p-12 md:p-16 text-center">
-              <h2 className="text-4xl md:text-5xl font-bold mb-4">
+              <h2 id="pricing-heading" className="text-4xl md:text-5xl font-bold mb-4">
                 Get started today!
               </h2>
               <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">

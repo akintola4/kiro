@@ -98,7 +98,15 @@ export function Footer() {
         {/* Copyright */}
         <div className="pt-8 border-t border-border/40">
           <p className="text-sm text-muted-foreground">
-            Copyright © {new Date().getFullYear()} QuickOnboardDoc, Inc. All rights reserved.
+            Copyright © {new Date().getFullYear()} QuickOnboardDoc, Inc. All rights reserved. | Designed & Developed by{" "}
+            <Link
+              href="https://x.com/photofola"
+              className="text-primary dark:text-primary hover:text-primary/80 dark:hover:text-blue-300 transition-colors duration-200"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Dev Akintola
+            </Link>
           </p>
         </div>
       </div>
