@@ -14,15 +14,10 @@ export default function NotFound() {
     const newCount = ghostClicks + 1;
     setGhostClicks(newCount);
 
-    if (newCount === 1) {
-      toast("👻 Boo!");
-    } else if (newCount === 3) {
-      toast("🎃 You found me!");
-    } else if (newCount === 5) {
-      toast("🎉 Keep clicking...");
-    } else if (newCount === 10) {
+    // Only show subtle hints, no early toasts
+    if (newCount === 15) {
       setIsPartyMode(true);
-      toast.success("🎊 PARTY MODE ACTIVATED! 🎊");
+      toast.success("🎊 You found the secret! 🎊");
       // Reset after 5 seconds
       setTimeout(() => {
         setIsPartyMode(false);
@@ -54,11 +49,11 @@ export default function NotFound() {
           <div className="absolute inset-0 flex items-center justify-center">
             <button
               onClick={handleGhostClick}
-              className="relative group cursor-pointer focus:outline-none"
-              aria-label="Click the ghost for a surprise"
+              className="relative group cursor-default focus:outline-none"
+              aria-label="Ghost"
             >
               <Ghost className={`w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 text-primary transition-all duration-300 ${
-                isPartyMode ? "animate-spin" : "animate-pulse group-hover:scale-110"
+                isPartyMode ? "animate-spin" : "group-hover:scale-105"
               }`} />
               {isPartyMode && (
                 <>
