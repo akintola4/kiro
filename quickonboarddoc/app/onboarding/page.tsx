@@ -29,38 +29,53 @@ function OnboardingContent() {
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [workspaces, setWorkspaces] = useState<any[]>([]);
+  const [selectedWorkspace, setSelectedWorkspace] = useState("");
+  const [showCreateForm, setShowCreateForm] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login");
     } else if (status === "authenticated") {
-      // Check if user already has a workspace
-      fetch("/api/workspace/info", {
+      // Fetch all workspaces user is a member of
+      fetch("/api/workspaces", {
         credentials: "include",
       })
         .then((res) => {
           if (res.status === 404 || res.status === 401) {
-            // No workspace found or unauthorized, show onboarding form
             setIsReady(true);
+            setShowCreateForm(true);
             return null;
           }
           return res.json();
         })
         .then((data) => {
-          if (data?.workspace) {
-            // User already has a workspace, redirect to dashboard
-            router.push("/dashboard/home");
+          if (data?.workspaces && data.workspaces.length > 0) {
+            setWorkspaces(data.workspaces);
+            setIsReady(true);
           } else {
-            // No workspace, show onboarding form
+            // No workspaces, show create form
+            setShowCreateForm(true);
             setIsReady(true);
           }
         })
         .catch(() => {
-          // If error, assume no workspace and show form
+          setShowCreateForm(true);
           setIsReady(true);
         });
     }
   }, [status, router]);
+
+  const handleWorkspaceSelect = () => {
+    if (!selectedWorkspace) {
+      toast.error("Please select a workspace");
+      return;
+    }
+    
+    // Store selected workspace in localStorage
+    localStorage.setItem("selectedWorkspaceId", selectedWorkspace);
+    router.push("/dashboard/home");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,6 +92,13 @@ function OnboardingContent() {
         const data = await response.json();
         toast.error(data.error || "Failed to create workspace");
         return;
+      }
+
+      const result = await response.json();
+      
+      // Store the new workspace ID
+      if (result.workspace?.id) {
+        localStorage.setItem("selectedWorkspaceId", result.workspace.id);
       }
 
       toast.success("Workspace created successfully!");
@@ -108,15 +130,56 @@ function OnboardingContent() {
           <IconSkull className="w-16 h-16 text-primary" />
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Create Your Workspace</CardTitle>
-            <CardDescription>
-              Set up your company workspace to start onboarding new hires
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+        {!showCreateForm && workspaces.length > 0 ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Choose Your Workspace</CardTitle>
+              <CardDescription>
+                Select a workspace to continue or create a new one
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="workspace">Workspace</Label>
+                <select
+                  id="workspace"
+                  value={selectedWorkspace}
+                  onChange={(e) => setSelectedWorkspace(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md bg-background"
+                >
+                  <option value="">Select a workspace</option>
+                  {workspaces.map((ws) => (
+                    <option key={ws.id} value={ws.id}>
+                      {ws.name} ({ws._count.members} members)
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex gap-3">
+                <Button onClick={handleWorkspaceSelect} className="flex-1">
+                  Continue
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowCreateForm(true)}
+                  className="flex-1"
+                >
+                  Create New
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle>Create Your Workspace</CardTitle>
+              <CardDescription>
+                Set up your company workspace to start onboarding new hires
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="workspaceName">Workspace Name</Label>
                 <Input
@@ -152,12 +215,23 @@ function OnboardingContent() {
                   rows={4}
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? <LoadingButton>Creating workspace...</LoadingButton> : "Create Workspace"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? <LoadingButton>Creating workspace...</LoadingButton> : "Create Workspace"}
+                </Button>
+                {workspaces.length > 0 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowCreateForm(false)}
+                    className="w-full"
+                  >
+                    Back to Selection
+                  </Button>
+                )}
+              </form>
+            </CardContent>
+          </Card>
+        )}
       </motion.div>
     </div>
   );

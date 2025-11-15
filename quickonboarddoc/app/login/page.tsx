@@ -33,7 +33,7 @@ export default function LoginPage() {
         toast.error("Invalid credentials");
       } else {
         toast.success("Welcome back!");
-        router.push("/dashboard/home");
+        router.push("/onboarding");
       }
     } catch (error) {
       toast.error("Something went wrong");
@@ -43,7 +43,7 @@ export default function LoginPage() {
   };
 
   const handleGoogleSignIn = () => {
-    signIn("google", { callbackUrl: "/dashboard/home" });
+    signIn("google", { callbackUrl: "/onboarding" });
   };
 
   return (
