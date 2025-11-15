@@ -1,6 +1,6 @@
 import { Ghost } from "lucide-react";
 import Link from "next/link";
-import { IconBrandLinkedin, IconBrandX, IconBrandInstagram, IconBrandYoutube } from "@tabler/icons-react";
+import { IconBrandLinkedin, IconBrandX, IconBrandGithub, IconBrandYoutube } from "@tabler/icons-react";
 
 const footerLinks = {
   company: [
@@ -17,9 +17,9 @@ const footerLinks = {
     { label: "Privacy Policy", href: "#" },
   ],
   social: [
-    { label: "LinkedIn", href: "https://linkedin.com", icon: IconBrandLinkedin, external: true },
-    { label: "X", href: "https://x.com", icon: IconBrandX, external: true },
-    { label: "Instagram", href: "https://instagram.com", icon: IconBrandInstagram, external: true },
+    { label: "LinkedIn", href: "https://www.linkedin.com/in/tope-akintola-b47b381b9/", icon: IconBrandLinkedin, external: true },
+    { label: "X (Twitter)", href: "https://x.com/photofola", icon: IconBrandX, external: true },
+    { label: "GitHub", href: "https://github.com/akintola4", icon: IconBrandGithub, external: true },
     { label: "YouTube", href: "https://www.youtube.com/@DevAkintola", icon: IconBrandYoutube, external: true },
   ],
 };
