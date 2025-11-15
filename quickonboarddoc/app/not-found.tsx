@@ -1,12 +1,40 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Ghost, Home, ArrowLeft } from "lucide-react";
+import { Ghost, Home, ArrowLeft, Sparkles } from "lucide-react";
+import { toast } from "sonner";
 
 export default function NotFound() {
+  const [ghostClicks, setGhostClicks] = useState(0);
+  const [isPartyMode, setIsPartyMode] = useState(false);
+
+  const handleGhostClick = () => {
+    const newCount = ghostClicks + 1;
+    setGhostClicks(newCount);
+
+    if (newCount === 1) {
+      toast("👻 Boo!");
+    } else if (newCount === 3) {
+      toast("🎃 You found me!");
+    } else if (newCount === 5) {
+      toast("🎉 Keep clicking...");
+    } else if (newCount === 10) {
+      setIsPartyMode(true);
+      toast.success("🎊 PARTY MODE ACTIVATED! 🎊");
+      // Reset after 5 seconds
+      setTimeout(() => {
+        setIsPartyMode(false);
+        setGhostClicks(0);
+      }, 5000);
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-background via-background to-primary/5 relative overflow-hidden">
+    <div className={`min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-background via-background to-primary/5 relative overflow-hidden transition-all duration-500 ${
+      isPartyMode ? "animate-pulse" : ""
+    }`}>
       {/* Floating Ghosts Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <Ghost className="absolute top-20 left-10 w-12 h-12 text-primary/20 animate-bounce" style={{ animationDelay: "0s", animationDuration: "3s" }} />
@@ -18,11 +46,29 @@ export default function NotFound() {
       <div className="max-w-2xl mx-auto text-center relative z-10">
         {/* Large 404 with Ghost */}
         <div className="relative mb-8">
-          <h1 className="text-[150px] sm:text-[200px] md:text-[250px] font-bold text-primary/10 leading-none select-none">
+          <h1 className={`text-[150px] sm:text-[200px] md:text-[250px] font-bold leading-none select-none transition-all duration-300 ${
+            isPartyMode ? "text-primary animate-pulse" : "text-primary/10"
+          }`}>
             404
           </h1>
           <div className="absolute inset-0 flex items-center justify-center">
-            <Ghost className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 text-primary animate-pulse" />
+            <button
+              onClick={handleGhostClick}
+              className="relative group cursor-pointer focus:outline-none"
+              aria-label="Click the ghost for a surprise"
+            >
+              <Ghost className={`w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 text-primary transition-all duration-300 ${
+                isPartyMode ? "animate-spin" : "animate-pulse group-hover:scale-110"
+              }`} />
+              {isPartyMode && (
+                <>
+                  <Sparkles className="absolute -top-4 -right-4 w-8 h-8 text-yellow-400 animate-bounce" />
+                  <Sparkles className="absolute -bottom-4 -left-4 w-8 h-8 text-pink-400 animate-bounce" style={{ animationDelay: "0.2s" }} />
+                  <Sparkles className="absolute -top-4 -left-4 w-8 h-8 text-blue-400 animate-bounce" style={{ animationDelay: "0.4s" }} />
+                  <Sparkles className="absolute -bottom-4 -right-4 w-8 h-8 text-green-400 animate-bounce" style={{ animationDelay: "0.6s" }} />
+                </>
+              )}
+            </button>
           </div>
         </div>
 
