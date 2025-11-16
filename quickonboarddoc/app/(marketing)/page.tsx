@@ -149,7 +149,7 @@ export default function HomePage() {
             transition={{ delay: 0.2 }}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8"
           >
-            <span className="text-sm font-medium text-primary">New feature: AI Autopilot</span>
+            <span className="text-sm font-medium text-primary">Powered by RAG Technology</span>
             <span className="text-primary">→</span>
           </motion.div>
 
@@ -157,15 +157,15 @@ export default function HomePage() {
           <h1 id="hero-heading" className="text-6xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight">
             Onboard with{" "}
             <span className="text-primary">
-              superpowers
-            </span>{" "}
+              precision
+            </span>
             <br />
-            using AI
+            using RAG + AI
           </h1>
 
           {/* Subtitle */}
           <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-            <span className="font-semibold text-foreground">QuickOnboardDoc:</span> The all in one AI assistant for new hire onboarding
+            <span className="font-semibold text-foreground">QuickOnboardDoc</span> uses Retrieval-Augmented Generation to deliver accurate, source-backed answers from your company docs—instantly.
           </p>
 
           {/* CTA Buttons */}
@@ -277,7 +277,7 @@ export default function HomePage() {
             className="max-w-6xl mx-auto"
           >
             <div className="mb-4">
-              <span className="text-sm font-semibold text-primary">AI-Powered Onboarding</span>
+              <span className="text-sm font-semibold text-primary">RAG-Powered Onboarding</span>
             </div>
             <h2 id="about-heading" className="text-4xl md:text-5xl font-bold mb-6 max-w-3xl">
               Instant answers from your company docs
