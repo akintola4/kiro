@@ -170,8 +170,8 @@ export default function HomePage() {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
-            <Link href="/signup" aria-label="Sign up for free account">
-              <Button size="lg" className="text-lg px-8 h-14 rounded-full">
+            <Link href="/signup" aria-label="Sign up for free account" className="w-full sm:w-auto">
+              <Button size="lg" className="w-full text-lg px-8 h-14 rounded-full">
                 Sign up, It's FREE!
               </Button>
             </Link>
@@ -180,11 +180,12 @@ export default function HomePage() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Watch demo video on YouTube"
+              className="w-full sm:w-auto"
             >
               <Button
                 variant="outline"
                 size="lg"
-                className="text-lg px-8 h-14 rounded-full"
+                className="w-full text-lg px-8 h-14 rounded-full"
               >
                 <svg
                   className="w-5 h-5 mr-2"
@@ -287,7 +288,7 @@ export default function HomePage() {
               Our AI works 24/7, constantly learning from your documentation to deliver precise answers when your team needs them most.
             </p>
             <Link href="#pricing">
-              <Button variant="outline" className="rounded-full">
+              <Button size="lg" variant="outline" className="rounded-full px-8 h-12">
                 Learn more →
               </Button>
             </Link>
@@ -546,8 +547,8 @@ export default function HomePage() {
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <Link href="/signup">
-                  <Button size="lg" className="px-8 h-12 rounded-full text-base">
+                <Link href="/signup" className="w-full sm:w-auto">
+                  <Button size="lg" className="w-full px-8 h-12 rounded-full text-base">
                     Try it right now
                   </Button>
                 </Link>
@@ -555,11 +556,12 @@ export default function HomePage() {
                   href="https://www.linkedin.com/in/tope-akintola-b47b381b9/"
                   target="_blank"
                   rel="noopener noreferrer"
+                  className="w-full sm:w-auto"
                 >
                   <Button
                     variant="outline"
                     size="lg"
-                    className="px-8 h-12 rounded-full text-base"
+                    className="w-full px-8 h-12 rounded-full text-base"
                   >
                     Book a demo
                     <span className="ml-2">↗</span>
