@@ -1,0 +1,32 @@
+{
+  "name": "QuickOnboardDoc - AI-Powered Employee Onboarding",
+  "short_name": "QuickOnboard",
+  "description": "Streamline employee onboarding with RAG-powered AI. Get instant answers from company docs.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#8b5cf6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity", "education"],
+  "screenshots": [
+    {
+      "src": "/app-preview.webp",
+      "sizes": "1920x1080",
+      "type": "image/webp"
+    }
+  ]
+}

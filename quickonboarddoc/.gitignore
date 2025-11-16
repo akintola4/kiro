@@ -32,6 +32,11 @@ yarn-error.log*
 # uploads
 /public/uploads
 
+# PWA generated files
+/public/sw.js
+/public/workbox-*.js
+/public/fallback-*.js
+
 # vercel
 .vercel
 

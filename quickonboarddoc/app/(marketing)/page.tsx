@@ -154,7 +154,7 @@ export default function HomePage() {
           </motion.div>
 
           {/* Hero Title */}
-          <h1 id="hero-heading" className="text-6xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight">
+          <h1 id="hero-heading" className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
             Onboard with{" "}
             <span className="text-primary">
               precision
@@ -164,7 +164,7 @@ export default function HomePage() {
           </h1>
 
           {/* Subtitle */}
-          <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
+          <p className="text-md md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
             <span className="font-semibold text-foreground">QuickOnboardDoc</span> uses Retrieval-Augmented Generation to deliver accurate, source-backed answers from your company docs—instantly.
           </p>
 
