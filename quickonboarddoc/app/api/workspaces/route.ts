@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
-// GET - Fetch all workspaces user is a member of
+// GET - Fetch all workspaces the user is a member of
 export async function GET() {
   try {
     const session = await auth();
@@ -19,7 +19,11 @@ export async function GET() {
           },
         },
       },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        createdAt: true,
         _count: {
           select: {
             members: true,

@@ -2,12 +2,15 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { IconFolder, IconMessageCircle, IconUsers, IconSparkles, IconTrendingUp, IconClock } from "@tabler/icons-react";
+import { IconFolder, IconMessageCircle, IconSparkles, IconTrendingUp } from "@tabler/icons-react";
 import Link from "next/link";
+import { WorkspaceCard } from "@/components/dashboard/WorkspaceCard";
+import { getCurrentWorkspace } from "@/lib/workspace-context";
 
 export default async function DashboardHomePage() {
   const session = await auth();
 
+  // Get all workspaces for the workspace list
   const workspaces = await prisma.workspace.findMany({
     where: {
       members: {
@@ -25,6 +28,50 @@ export default async function DashboardHomePage() {
       },
     },
   });
+
+  // Get current workspace for stats
+  const currentWorkspaceBase = await getCurrentWorkspace(session?.user?.id!);
+  const currentWorkspace = currentWorkspaceBase ? await prisma.workspace.findUnique({
+    where: { id: currentWorkspaceBase.id },
+    include: {
+      _count: {
+        select: {
+          documents: true,
+          members: true,
+        },
+      },
+    },
+  }) : null;
+  const workspaceIds = currentWorkspace ? [currentWorkspace.id] : [];
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+
+  const [currentMonthQueries, lastMonthQueries] = await Promise.all([
+    prisma.chatQuery.count({
+      where: {
+        workspaceId: { in: workspaceIds },
+        createdAt: { gte: startOfMonth },
+      },
+    }),
+    prisma.chatQuery.count({
+      where: {
+        workspaceId: { in: workspaceIds },
+        createdAt: {
+          gte: startOfLastMonth,
+          lte: endOfLastMonth,
+        },
+      },
+    }),
+  ]);
+
+  const percentageChange =
+    lastMonthQueries > 0
+      ? Math.round(((currentMonthQueries - lastMonthQueries) / lastMonthQueries) * 100)
+      : currentMonthQueries > 0
+      ? 100
+      : 0;
 
   return (
     <div className="space-y-6 sm:space-y-8">
@@ -48,9 +95,14 @@ export default async function DashboardHomePage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-primary">247</div>
+            <div className="text-3xl font-bold text-primary">{currentMonthQueries}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              <span className="text-green-600 dark:text-green-400">+12%</span> from last month
+              {percentageChange !== 0 && (
+                <span className={percentageChange > 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}>
+                  {percentageChange > 0 ? "+" : ""}{percentageChange}%
+                </span>
+              )}
+              {percentageChange === 0 && <span>No change</span>} from last month
             </p>
           </CardContent>
         </Card>
@@ -63,8 +115,8 @@ export default async function DashboardHomePage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{workspaces.reduce((acc, w) => acc + w._count.documents, 0)}</div>
-            <p className="text-xs text-muted-foreground mt-1">Across all workspaces</p>
+            <div className="text-3xl font-bold">{currentWorkspace?._count?.documents || 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">In current workspace</p>
           </CardContent>
         </Card>
 
@@ -111,43 +163,7 @@ export default async function DashboardHomePage() {
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {workspaces.map((workspace) => (
-              <Card key={workspace.id} className="hover:border-primary/50 hover:shadow-md transition-all group">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="group-hover:text-primary transition-colors">{workspace.name}</CardTitle>
-                      <CardDescription className="mt-1">{workspace.companyId}</CardDescription>
-                    </div>
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <span className="text-lg font-bold text-primary">{workspace.name.charAt(0)}</span>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <IconFolder className="w-4 h-4" />
-                        <span>Documents</span>
-                      </div>
-                      <span className="font-semibold">{workspace._count.documents}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <IconUsers className="w-4 h-4" />
-                        <span>Members</span>
-                      </div>
-                      <span className="font-semibold">{workspace._count.members}</span>
-                    </div>
-                    <Link href="/dashboard/docchat">
-                      <Button variant="outline" size="sm" className="w-full mt-2">
-                        <IconMessageCircle className="w-4 h-4 mr-2" />
-                        Open Chat
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
+              <WorkspaceCard key={workspace.id} workspace={workspace} />
             ))}
           </div>
         )}

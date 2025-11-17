@@ -66,15 +66,34 @@ function OnboardingContent() {
     }
   }, [status, router]);
 
-  const handleWorkspaceSelect = () => {
+  const handleWorkspaceSelect = async () => {
     if (!selectedWorkspace) {
       toast.error("Please select a workspace");
       return;
     }
     
-    // Store selected workspace in localStorage
-    localStorage.setItem("selectedWorkspaceId", selectedWorkspace);
-    router.push("/dashboard/home");
+    setLoading(true);
+    try {
+      // Switch to the selected workspace
+      const response = await fetch("/api/workspace/switch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workspaceId: selectedWorkspace }),
+      });
+
+      if (!response.ok) {
+        toast.error("Failed to switch workspace");
+        return;
+      }
+
+      toast.success("Workspace selected!");
+      router.push("/dashboard/home");
+      router.refresh();
+    } catch (error) {
+      toast.error("Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -95,14 +114,10 @@ function OnboardingContent() {
       }
 
       const result = await response.json();
-      
-      // Store the new workspace ID
-      if (result.workspace?.id) {
-        localStorage.setItem("selectedWorkspaceId", result.workspace.id);
-      }
 
       toast.success("Workspace created successfully!");
       router.push("/dashboard/home");
+      router.refresh();
     } catch (error) {
       toast.error("Something went wrong");
     } finally {
@@ -156,14 +171,15 @@ function OnboardingContent() {
                 </select>
               </div>
               <div className="flex gap-3">
-                <Button onClick={handleWorkspaceSelect} className="flex-1">
-                  Continue
+                <Button onClick={handleWorkspaceSelect} className="flex-1" disabled={loading}>
+                  {loading ? <LoadingButton>Switching...</LoadingButton> : "Continue"}
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setShowCreateForm(true)}
                   className="flex-1"
+                  disabled={loading}
                 >
                   Create New
                 </Button>

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { createNotification } from "@/lib/notifications";
+import { setSelectedWorkspaceId } from "@/lib/workspace-context";
 
 export async function POST(req: Request) {
   try {
@@ -45,6 +47,17 @@ export async function POST(req: Request) {
           },
         },
       },
+    });
+
+    // Set this as the selected workspace
+    await setSelectedWorkspaceId(workspace.id);
+
+    // Create notification for workspace creation
+    await createNotification({
+      userId: session.user.id,
+      workspaceId: workspace.id,
+      title: "Workspace Created",
+      message: `Successfully created workspace "${name}"`,
     });
 
     return NextResponse.json({ workspace }, { status: 201 });

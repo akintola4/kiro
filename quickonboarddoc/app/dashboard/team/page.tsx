@@ -77,6 +77,7 @@ export default function TeamPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["team"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
       toast.success("Role updated successfully");
       setDialogOpen(false);
     },
@@ -95,6 +96,7 @@ export default function TeamPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["team"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
       toast.success("Member removed successfully");
     },
     onError: () => {

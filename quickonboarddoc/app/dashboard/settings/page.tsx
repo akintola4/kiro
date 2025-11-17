@@ -58,6 +58,7 @@ export default function SettingsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["workspace"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
       toast.success("Workspace updated successfully");
       setEditDialogOpen(false);
     },
@@ -97,6 +98,7 @@ export default function SettingsPage() {
       return response.json();
     },
     onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
       setInviteUrl(data.invite.inviteUrl);
       setShowInviteUrl(true);
       toast.success("Invite created successfully");

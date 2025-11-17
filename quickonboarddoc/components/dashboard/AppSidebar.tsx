@@ -19,12 +19,13 @@ import {
   IconFolder,
   IconMessageCircle,
   IconLogout,
-  IconSparkles,
   IconChevronRight,
   IconUsers,
 } from "@tabler/icons-react";
 import { Ghost } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
+import { AIUsageCard } from "./AIUsageCard";
+import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -78,6 +79,9 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
+        <div className="px-3">
+          <WorkspaceSwitcher />
+        </div>
         <div className="space-y-6">
           {navSections.map((section) => (
             <div key={section.title} className="px-3">
@@ -118,27 +122,7 @@ export function AppSidebar() {
         </div>
 
         {/* Quick Stats Card */}
-        <div className="mx-6 mt-auto mb-4 p-4 rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-purple-500/10 border border-primary/20 shadow-sm">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="p-1.5 rounded-lg bg-primary/10">
-              <IconSparkles className="w-4 h-4 text-primary" />
-            </div>
-            <span className="text-sm font-semibold">AI Usage</span>
-          </div>
-          <div className="space-y-2">
-            <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">This month</span>
-              <span className="font-bold">247 queries</span>
-            </div>
-            <div className="h-2 bg-muted/50 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-primary to-purple-500 rounded-full transition-all duration-500" 
-                style={{ width: "65%" }} 
-              />
-            </div>
-            <p className="text-xs text-muted-foreground">35% more than last month</p>
-          </div>
-        </div>
+        <AIUsageCard />
       </SidebarContent>
 
       <SidebarFooter>

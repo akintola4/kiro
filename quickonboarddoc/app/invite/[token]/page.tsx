@@ -79,10 +79,20 @@ export default function InvitePage() {
         setError(data.error || "Failed to accept invite");
         setAccepting(false);
       } else {
+        // Switch to the new workspace
+        if (data.workspaceId) {
+          await fetch("/api/workspace/switch", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ workspaceId: data.workspaceId }),
+          });
+        }
+        
         toast.success("Welcome to the workspace!");
         // Small delay before redirect for better UX
         await new Promise(resolve => setTimeout(resolve, 1000));
         router.push("/dashboard/home");
+        router.refresh();
       }
     } catch (err) {
       setError("Failed to accept invite");

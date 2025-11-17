@@ -150,3 +150,19 @@ model WorkspaceInvite {
   @@index([token])
   @@index([email])
 }
+
+model ChatQuery {
+  id          String   @id @default(cuid())
+  workspaceId String
+  userId      String
+  query       String   @db.Text
+  response    String   @db.Text
+  confidence  Float?
+  sources     String?  @db.Text // JSON array of source documents
+
+  createdAt DateTime @default(now())
+
+  @@index([workspaceId])
+  @@index([userId])
+  @@index([createdAt])
+}

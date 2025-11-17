@@ -1,14 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { IconFile, IconTrash, IconUpload } from "@tabler/icons-react";
 import { toast } from "sonner";
+import { Ghost } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function StoragePage() {
   const [uploading, setUploading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [documentToDelete, setDocumentToDelete] = useState<{ id: string; name: string } | null>(null);
+  const queryClient = useQueryClient();
 
   const { data: documents, refetch } = useQuery({
     queryKey: ["documents"],
@@ -38,7 +53,9 @@ export default function StoragePage() {
       }
 
       toast.success("File uploaded successfully!");
-      refetch();
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
     } catch (error) {
       toast.error("Failed to upload file");
     } finally {
@@ -46,9 +63,17 @@ export default function StoragePage() {
     }
   };
 
-  const handleDelete = async (documentId: string) => {
+  const openDeleteDialog = (doc: { id: string; name: string }) => {
+    setDocumentToDelete(doc);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!documentToDelete) return;
+
+    setDeleting(true);
     try {
-      const response = await fetch(`/api/documents/${documentId}`, {
+      const response = await fetch(`/api/documents/${documentToDelete.id}`, {
         method: "DELETE",
       });
 
@@ -57,9 +82,15 @@ export default function StoragePage() {
       }
 
       toast.success("File deleted successfully!");
-      refetch();
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      setDeleteDialogOpen(false);
+      setDocumentToDelete(null);
     } catch (error) {
       toast.error("Failed to delete file");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -91,6 +122,21 @@ export default function StoragePage() {
         </div>
       </div>
 
+      {/* Loading States */}
+      {(uploading || deleting) && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <Ghost className="w-16 h-16 text-primary animate-bounce" />
+            <p className="text-lg font-semibold">
+              {uploading ? "Processing document..." : "Deleting document..."}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {uploading ? "This may take a moment" : "Please wait"}
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {documents?.documents?.length === 0 ? (
           <Card className="col-span-full">
@@ -119,7 +165,7 @@ export default function StoragePage() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleDelete(doc.id)}
+                    onClick={() => openDeleteDialog({ id: doc.id, name: doc.name })}
                     className="text-destructive hover:text-destructive hover:bg-destructive/10"
                   >
                     <IconTrash className="w-4 h-4" />
@@ -130,6 +176,30 @@ export default function StoragePage() {
           ))
         )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Document</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{documentToDelete?.name}"? This action cannot be undone and will remove the document from your workspace.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDocumentToDelete(null)} disabled={deleting}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

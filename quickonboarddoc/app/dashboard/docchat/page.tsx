@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
@@ -25,6 +25,7 @@ export default function DocChatPage() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
 
   const { data: workspaceInfo } = useQuery({
     queryKey: ["workspace-info"],
@@ -66,6 +67,8 @@ export default function DocChatPage() {
           sources: data.sources,
         },
       ]);
+      // Trigger immediate stats refresh
+      window.dispatchEvent(new Event("refreshStats"));
     },
     onError: () => {
       toast.error("Failed to send message");

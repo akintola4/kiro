@@ -11,18 +11,48 @@ export async function createNotification({
   title: string;
   message: string;
 }) {
-  try {
-    await prisma.notification.create({
-      data: {
-        userId,
-        workspaceId,
-        title,
-        message,
-        read: false,
-      },
+  return await prisma.notification.create({
+    data: {
+      userId,
+      workspaceId,
+      title,
+      message,
+    },
+  });
+}
+
+export async function notifyWorkspaceMembers({
+  workspaceId,
+  title,
+  message,
+  excludeUserId,
+}: {
+  workspaceId: string;
+  title: string;
+  message: string;
+  excludeUserId?: string;
+}) {
+  const members = await prisma.workspaceMember.findMany({
+    where: {
+      workspaceId,
+      ...(excludeUserId && { userId: { not: excludeUserId } }),
+    },
+    select: {
+      userId: true,
+    },
+  });
+
+  const notifications = members.map((member) => ({
+    userId: member.userId,
+    workspaceId,
+    title,
+    message,
+  }));
+
+  if (notifications.length > 0) {
+    await prisma.notification.createMany({
+      data: notifications,
     });
-  } catch (error) {
-    console.error("Failed to create notification:", error);
   }
 }
 
@@ -37,19 +67,12 @@ export async function notifyDocumentProcessed({
   documentName: string;
   success: boolean;
 }) {
-  if (success) {
-    await createNotification({
-      userId,
-      workspaceId,
-      title: "Document Ready! 📄",
-      message: `"${documentName}" has been uploaded, processed, and is ready to use in AI Chat.`,
-    });
-  } else {
-    await createNotification({
-      userId,
-      workspaceId,
-      title: "Document Processing Failed ❌",
-      message: `Failed to process "${documentName}". Please try uploading again.`,
-    });
-  }
+  return await createNotification({
+    userId,
+    workspaceId,
+    title: success ? "Document Processed" : "Document Processing Failed",
+    message: success
+      ? `"${documentName}" has been processed and is ready for AI chat`
+      : `Failed to process "${documentName}". Please try uploading again.`,
+  });
 }

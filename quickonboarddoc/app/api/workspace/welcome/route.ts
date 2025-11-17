@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { generateWelcomeMessage } from "@/lib/rag";
+import { getCurrentWorkspace } from "@/lib/workspace-context";
 
 export async function GET() {
   try {
@@ -11,14 +12,17 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const workspace = await prisma.workspace.findFirst({
-      where: {
-        members: {
-          some: {
-            userId: session.user.id,
-          },
-        },
-      },
+    const currentWorkspace = await getCurrentWorkspace(session.user.id);
+
+    if (!currentWorkspace) {
+      return NextResponse.json(
+        { error: "No workspace found" },
+        { status: 404 }
+      );
+    }
+
+    const workspace = await prisma.workspace.findUnique({
+      where: { id: currentWorkspace.id },
       include: {
         documents: {
           select: {

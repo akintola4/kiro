@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { notifyWorkspaceMembers } from "@/lib/notifications";
+import { getCurrentWorkspace } from "@/lib/workspace-context";
 
 // GET - Fetch workspace details
 export async function GET() {
@@ -11,14 +13,17 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const workspace = await prisma.workspace.findFirst({
-      where: {
-        members: {
-          some: {
-            userId: session.user.id,
-          },
-        },
-      },
+    const workspace = await getCurrentWorkspace(session.user.id);
+    
+    if (!workspace) {
+      return NextResponse.json(
+        { error: "No workspace found" },
+        { status: 404 }
+      );
+    }
+
+    const workspaceDetails = await prisma.workspace.findUnique({
+      where: { id: workspace.id },
       include: {
         members: {
           include: {
@@ -50,14 +55,14 @@ export async function GET() {
       },
     });
 
-    if (!workspace) {
+    if (!workspaceDetails) {
       return NextResponse.json(
         { error: "No workspace found" },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ workspace });
+    return NextResponse.json({ workspace: workspaceDetails });
   } catch (error) {
     console.error("Failed to fetch workspace:", error);
     return NextResponse.json(
@@ -78,24 +83,31 @@ export async function PUT(req: Request) {
 
     const { name, description } = await req.json();
 
-    // Get user's workspace
-    const workspace = await prisma.workspace.findFirst({
+    // Get current workspace
+    const workspace = await getCurrentWorkspace(session.user.id);
+
+    if (!workspace) {
+      return NextResponse.json(
+        { error: "Workspace not found" },
+        { status: 404 }
+      );
+    }
+
+    // Verify user has admin/owner permissions
+    const member = await prisma.workspaceMember.findFirst({
       where: {
-        members: {
-          some: {
-            userId: session.user.id,
-            role: {
-              in: ["owner", "admin"],
-            },
-          },
+        workspaceId: workspace.id,
+        userId: session.user.id,
+        role: {
+          in: ["owner", "admin"],
         },
       },
     });
 
-    if (!workspace) {
+    if (!member) {
       return NextResponse.json(
-        { error: "Workspace not found or insufficient permissions" },
-        { status: 404 }
+        { error: "Insufficient permissions" },
+        { status: 403 }
       );
     }
 
@@ -105,6 +117,24 @@ export async function PUT(req: Request) {
         name,
         description,
       },
+    });
+
+    // Notify the user who updated it
+    await prisma.notification.create({
+      data: {
+        userId: session.user.id,
+        workspaceId: workspace.id,
+        title: "Workspace Updated",
+        message: `You updated "${name}" workspace settings`,
+      },
+    });
+
+    // Notify other workspace members about the update
+    await notifyWorkspaceMembers({
+      workspaceId: workspace.id,
+      title: "Workspace Updated",
+      message: `${session.user.name} updated workspace settings`,
+      excludeUserId: session.user.id,
     });
 
     return NextResponse.json({ workspace: updatedWorkspace });
@@ -126,22 +156,29 @@ export async function DELETE() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get user's workspace (only owner can delete)
-    const workspace = await prisma.workspace.findFirst({
-      where: {
-        members: {
-          some: {
-            userId: session.user.id,
-            role: "owner",
-          },
-        },
-      },
-    });
+    // Get current workspace
+    const workspace = await getCurrentWorkspace(session.user.id);
 
     if (!workspace) {
       return NextResponse.json(
-        { error: "Workspace not found or insufficient permissions" },
+        { error: "Workspace not found" },
         { status: 404 }
+      );
+    }
+
+    // Verify user is owner
+    const member = await prisma.workspaceMember.findFirst({
+      where: {
+        workspaceId: workspace.id,
+        userId: session.user.id,
+        role: "owner",
+      },
+    });
+
+    if (!member) {
+      return NextResponse.json(
+        { error: "Only workspace owners can delete workspaces" },
+        { status: 403 }
       );
     }
 

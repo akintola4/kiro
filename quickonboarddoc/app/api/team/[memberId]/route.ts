@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { createNotification, notifyWorkspaceMembers } from "@/lib/notifications";
 
 // PUT - Update member role
 export async function PUT(
@@ -55,7 +56,29 @@ export async function PUT(
             image: true,
           },
         },
+        workspace: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
+    });
+
+    // Notify the user about role change
+    await createNotification({
+      userId: updatedMember.userId,
+      workspaceId: updatedMember.workspaceId,
+      title: "Role Updated",
+      message: `Your role in ${updatedMember.workspace.name} has been changed to ${role}`,
+    });
+
+    // Notify other admins
+    await notifyWorkspaceMembers({
+      workspaceId: updatedMember.workspaceId,
+      title: "Team Member Role Updated",
+      message: `${session.user.name} changed ${updatedMember.user.name}'s role to ${role}`,
+      excludeUserId: updatedMember.userId,
     });
 
     return NextResponse.json({ member: updatedMember });
@@ -115,9 +138,35 @@ export async function DELETE(
       );
     }
 
+    const memberWithDetails = await prisma.workspaceMember.findUnique({
+      where: { id: memberId },
+      include: {
+        user: { select: { name: true } },
+        workspace: { select: { id: true, name: true } },
+      },
+    });
+
     await prisma.workspaceMember.delete({
       where: { id: memberId },
     });
+
+    // Notify the removed user
+    if (memberWithDetails) {
+      await createNotification({
+        userId: memberWithDetails.userId,
+        workspaceId: memberWithDetails.workspaceId,
+        title: "Removed from Workspace",
+        message: `You have been removed from ${memberWithDetails.workspace.name}`,
+      });
+
+      // Notify other members
+      await notifyWorkspaceMembers({
+        workspaceId: memberWithDetails.workspaceId,
+        title: "Team Member Removed",
+        message: `${session.user.name} removed ${memberWithDetails.user.name} from the workspace`,
+        excludeUserId: memberWithDetails.userId,
+      });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

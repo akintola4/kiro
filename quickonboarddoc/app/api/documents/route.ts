@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { getCurrentWorkspace } from "@/lib/workspace-context";
 
 export async function GET() {
   try {
@@ -10,24 +11,25 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const workspaces = await prisma.workspace.findMany({
+    // Get current workspace
+    const workspace = await getCurrentWorkspace(session.user.id);
+
+    if (!workspace) {
+      return NextResponse.json(
+        { error: "No workspace found" },
+        { status: 404 }
+      );
+    }
+
+    // Get documents only from the selected workspace
+    const documents = await prisma.document.findMany({
       where: {
-        members: {
-          some: {
-            userId: session.user.id,
-          },
-        },
+        workspaceId: workspace.id,
       },
-      include: {
-        documents: {
-          orderBy: {
-            createdAt: "desc",
-          },
-        },
+      orderBy: {
+        createdAt: "desc",
       },
     });
-
-    const documents = workspaces.flatMap((w) => w.documents);
 
     return NextResponse.json({ documents });
   } catch (error) {

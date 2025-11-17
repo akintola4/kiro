@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { del } from "@vercel/blob";
+import { notifyWorkspaceMembers } from "@/lib/notifications";
 
 export async function DELETE(
   req: Request,
@@ -54,6 +55,24 @@ export async function DELETE(
     // Delete from database (cascades to chunks)
     await prisma.document.delete({
       where: { id },
+    });
+
+    // Notify the user who deleted it
+    await prisma.notification.create({
+      data: {
+        userId: session.user.id,
+        workspaceId: document.workspaceId,
+        title: "Document Deleted",
+        message: `You deleted "${document.name}"`,
+      },
+    });
+
+    // Notify other workspace members
+    await notifyWorkspaceMembers({
+      workspaceId: document.workspaceId,
+      title: "Document Deleted",
+      message: `${session.user.name} deleted "${document.name}"`,
+      excludeUserId: session.user.id,
     });
 
     return NextResponse.json({ message: "Document deleted" });

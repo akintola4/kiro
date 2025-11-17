@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { getCurrentWorkspace } from "@/lib/workspace-context";
 
 export async function POST(req: Request) {
   try {
@@ -19,16 +20,8 @@ export async function POST(req: Request) {
       );
     }
 
-    // Get user's workspace
-    const workspace = await prisma.workspace.findFirst({
-      where: {
-        members: {
-          some: {
-            userId: session.user.id,
-          },
-        },
-      },
-    });
+    // Get current workspace
+    const workspace = await getCurrentWorkspace(session.user.id);
 
     if (!workspace) {
       return NextResponse.json(
@@ -45,6 +38,18 @@ export async function POST(req: Request) {
       message,
       workspace.id
     );
+
+    // Track the query
+    await prisma.chatQuery.create({
+      data: {
+        workspaceId: workspace.id,
+        userId: session.user.id,
+        query: message,
+        response: answer,
+        confidence,
+        sources: sources ? JSON.stringify(sources) : null,
+      },
+    });
 
     return NextResponse.json({
       response: answer,

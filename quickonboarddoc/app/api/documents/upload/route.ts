@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { processDocument } from "@/lib/document-processor";
 import { notifyDocumentProcessed } from "@/lib/notifications";
 import { put } from "@vercel/blob";
+import { getCurrentWorkspace } from "@/lib/workspace-context";
 
 export async function POST(req: Request) {
   try {
@@ -20,16 +21,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    // Get user's first workspace
-    const workspace = await prisma.workspace.findFirst({
-      where: {
-        members: {
-          some: {
-            userId: session.user.id,
-          },
-        },
-      },
-    });
+    // Get current workspace
+    const workspace = await getCurrentWorkspace(session.user.id);
 
     if (!workspace) {
       return NextResponse.json(

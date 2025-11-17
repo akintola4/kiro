@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { createNotification, notifyWorkspaceMembers } from "@/lib/notifications";
 
 // GET - Get invite details by token
 export async function GET(
@@ -104,6 +105,11 @@ export async function POST(
     }
 
     // Add user to workspace and mark invite as accepted
+    const workspace = await prisma.workspace.findUnique({
+      where: { id: invite.workspaceId },
+      select: { name: true },
+    });
+
     await prisma.$transaction([
       prisma.workspaceMember.create({
         data: {
@@ -117,6 +123,22 @@ export async function POST(
         data: { accepted: true },
       }),
     ]);
+
+    // Notify the new member
+    await createNotification({
+      userId: session.user.id,
+      workspaceId: invite.workspaceId,
+      title: "Joined Workspace",
+      message: `Welcome to ${workspace?.name}! You've successfully joined as ${invite.role}`,
+    });
+
+    // Notify other workspace members
+    await notifyWorkspaceMembers({
+      workspaceId: invite.workspaceId,
+      title: "New Team Member",
+      message: `${session.user.name} joined ${workspace?.name}`,
+      excludeUserId: session.user.id,
+    });
 
     return NextResponse.json({
       success: true,

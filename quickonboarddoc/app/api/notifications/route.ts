@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { getCurrentWorkspace } from "@/lib/workspace-context";
 
-// GET - Fetch all notifications for the current user
-export async function GET() {
+// GET - Fetch notifications for the current user in the selected workspace
+export async function GET(req: Request) {
   try {
     const session = await auth();
 
@@ -11,9 +12,24 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Get current workspace
+    const workspace = await getCurrentWorkspace(session.user.id);
+
+    if (!workspace) {
+      return NextResponse.json(
+        { error: "No workspace found" },
+        { status: 404 }
+      );
+    }
+
+    // Check if user wants all notifications or just current workspace
+    const { searchParams } = new URL(req.url);
+    const allWorkspaces = searchParams.get("all") === "true";
+
     const notifications = await prisma.notification.findMany({
       where: {
         userId: session.user.id,
+        ...(allWorkspaces ? {} : { workspaceId: workspace.id }),
       },
       include: {
         workspace: {

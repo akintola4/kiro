@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { getCurrentWorkspace } from "@/lib/workspace-context";
 
 // GET - Fetch all team members in the workspace
 export async function GET() {
@@ -11,15 +12,18 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get user's workspace
-    const workspace = await prisma.workspace.findFirst({
-      where: {
-        members: {
-          some: {
-            userId: session.user.id,
-          },
-        },
-      },
+    // Get current workspace
+    const currentWorkspace = await getCurrentWorkspace(session.user.id);
+
+    if (!currentWorkspace) {
+      return NextResponse.json(
+        { error: "No workspace found" },
+        { status: 404 }
+      );
+    }
+
+    const workspace = await prisma.workspace.findUnique({
+      where: { id: currentWorkspace.id },
       include: {
         members: {
           include: {

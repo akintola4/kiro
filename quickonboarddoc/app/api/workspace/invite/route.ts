@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { randomBytes } from "crypto";
+import { getCurrentWorkspace } from "@/lib/workspace-context";
 
 // POST - Create a new invite
 export async function POST(req: Request) {
@@ -25,24 +26,31 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid role" }, { status: 400 });
     }
 
-    // Get user's workspace
-    const workspace = await prisma.workspace.findFirst({
+    // Get current workspace
+    const workspace = await getCurrentWorkspace(session.user.id);
+
+    if (!workspace) {
+      return NextResponse.json(
+        { error: "Workspace not found" },
+        { status: 404 }
+      );
+    }
+
+    // Verify user has admin/owner permissions
+    const member = await prisma.workspaceMember.findFirst({
       where: {
-        members: {
-          some: {
-            userId: session.user.id,
-            role: {
-              in: ["owner", "admin"],
-            },
-          },
+        workspaceId: workspace.id,
+        userId: session.user.id,
+        role: {
+          in: ["owner", "admin"],
         },
       },
     });
 
-    if (!workspace) {
+    if (!member) {
       return NextResponse.json(
-        { error: "Workspace not found or insufficient permissions" },
-        { status: 404 }
+        { error: "Insufficient permissions" },
+        { status: 403 }
       );
     }
 
@@ -123,16 +131,8 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get user's workspace
-    const workspace = await prisma.workspace.findFirst({
-      where: {
-        members: {
-          some: {
-            userId: session.user.id,
-          },
-        },
-      },
-    });
+    // Get current workspace
+    const workspace = await getCurrentWorkspace(session.user.id);
 
     if (!workspace) {
       return NextResponse.json(
