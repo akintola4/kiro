@@ -89,30 +89,10 @@ export async function generateWelcomeMessage(
   documentCount: number,
   documentNames: string[]
 ): Promise<string> {
-  const welcomePrompt = `Generate a friendly, professional welcome message for a new hire using an AI documentation assistant.
-
-Company: ${workspaceName}
-Available Documents: ${documentCount}
-Document List: ${documentNames.join(", ") || "None yet"}
-
-Create a warm welcome message that:
-1. Greets them enthusiastically
-2. Explains you're their AI documentation assistant
-3. Lists the available documents
-4. Encourages them to ask questions
-5. Keep it concise (3-4 sentences)
-
-Welcome Message:`;
-
-  try {
-    const response = await model.invoke(welcomePrompt);
-    return response.content as string;
-  } catch (error) {
-    // Fallback message
-    return `Welcome to ${workspaceName}! 🎉\n\nI'm your AI documentation assistant. I can help you find information from your company documents.\n\n**Currently available documents:**\n${
-      documentNames.length > 0
-        ? documentNames.map((name) => `• ${name}`).join("\n")
-        : "No documents uploaded yet. Upload some documents to get started!"
-    }\n\nAsk me anything about your documentation!`;
-  }
+  // Use fallback message directly - more reliable and faster
+  return `Welcome to ${workspaceName}! 🎉\n\nI'm your AI documentation assistant, here to help you navigate your company resources and answer questions.\n\n**Available documents (${documentCount}):**\n${
+    documentNames.length > 0
+      ? documentNames.map((name) => `• ${name}`).join("\n")
+      : "No documents uploaded yet. Upload some documents in the Storage page to get started!"
+  }\n\nFeel free to ask me anything about your documentation!`;
 }
