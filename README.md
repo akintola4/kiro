@@ -244,7 +244,9 @@ All projects are built with Kiro AI assistance. When making changes:
 
 ## 📄 License
 
-Each project may have its own license. Check individual project directories for details.
+All projects in this directory are licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+Individual projects may have their own LICENSE files in their respective directories.
 
 ---
 
