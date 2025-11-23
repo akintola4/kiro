@@ -75,7 +75,7 @@ export function FloatingGhost() {
           <DialogHeader className="relative z-10">
             <DialogTitle className="flex items-center justify-center gap-3 text-3xl pt-4">
               <Ghost className="w-8 h-8 text-primary animate-bounce" />
-              <span className="bg-gradient-to-r from-primary via-purple-500 to-primary bg-clip-text text-transparent animate-pulse">
+              <span className="bg-gradient-to-r from-primary via-gray-500 to-primary bg-clip-text text-transparent animate-pulse">
                 You found the secret!
               </span>
               <Sparkles className="w-6 h-6 text-primary animate-spin-slow" />
@@ -103,7 +103,7 @@ export function FloatingGhost() {
               </p>
             </div>
 
-            <div className="p-4 rounded-lg bg-gradient-to-r from-primary/10 via-purple-500/10 to-primary/10 border border-primary/30">
+            <div className="p-4 rounded-lg bg-gradient-to-r from-primary/10 via-gray-500/10 to-primary/10 border border-primary/30">
               <p className="text-sm text-muted-foreground">
                 <span className="font-bold text-foreground">🎮 Fun fact:</span> This entire app was built using{" "}
                 <a
