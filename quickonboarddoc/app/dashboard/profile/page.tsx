@@ -141,7 +141,7 @@ export default function ProfilePage() {
           <CardContent className="space-y-4 sm:space-y-6">
             {/* Profile Avatar */}
             <div className="flex items-center gap-3 sm:gap-4">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-primary/20 to-purple-500/20 flex items-center justify-center ring-4 ring-primary/10 flex-shrink-0">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-primary/20 to-gray-500/20 flex items-center justify-center ring-4 ring-primary/10 flex-shrink-0">
                 {profile.image ? (
                   <img
                     src={profile.image}

@@ -228,7 +228,7 @@ export default function SettingsPage() {
                 <span
                   className={`px-2 py-1 rounded-full text-xs font-medium uppercase ${
                     member.role === "owner"
-                      ? "bg-purple-500/10 text-purple-600 dark:text-purple-400"
+                      ? "bg-gray-500/10 text-gray-600 dark:text-gray-400"
                       : member.role === "admin"
                       ? "bg-green-500/10 text-green-600 dark:text-green-400"
                       : "bg-orange-500/10 text-orange-600 dark:text-orange-400"

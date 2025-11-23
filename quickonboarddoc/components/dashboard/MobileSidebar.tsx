@@ -147,7 +147,7 @@ export function MobileSidebar() {
             </div>
 
             {/* Quick Stats Card */}
-            <div className="mx-6 mt-6 p-4 rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-purple-500/10 border border-primary/20 shadow-sm">
+            <div className="mx-6 mt-6 p-4 rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-gray-500/10 border border-primary/20 shadow-sm">
               <div className="flex items-center gap-2 mb-3">
                 <div className="p-1.5 rounded-lg bg-primary/10">
                   <IconSparkles className="w-4 h-4 text-primary" />
@@ -161,7 +161,7 @@ export function MobileSidebar() {
                 </div>
                 <div className="h-2 bg-muted/50 rounded-full overflow-hidden">
                   <div 
-                    className="h-full bg-gradient-to-r from-primary to-purple-500 rounded-full transition-all duration-500" 
+                    className="h-full bg-gradient-to-r from-primary to-gray-500 rounded-full transition-all duration-500" 
                     style={{ width: "65%" }} 
                   />
                 </div>
@@ -180,7 +180,7 @@ export function MobileSidebar() {
                     variant="ghost"
                     className="w-full justify-start gap-3 h-auto p-3 hover:bg-muted/50"
                   >
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/20 to-purple-500/20 flex items-center justify-center ring-2 ring-primary/10">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/20 to-gray-500/20 flex items-center justify-center ring-2 ring-primary/10">
                       <span className="text-sm font-bold text-primary">
                         {session.user.name?.charAt(0) || "U"}
                       </span>

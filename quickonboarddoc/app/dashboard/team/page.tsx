@@ -137,7 +137,7 @@ export default function TeamPage() {
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case "owner":
-        return "bg-purple-500/10 text-purple-600 dark:text-purple-400";
+        return "bg-gray-500/10 text-gray-600 dark:text-gray-400";
       case "admin":
         return "bg-green-500/10 text-green-600 dark:text-green-400";
       default:

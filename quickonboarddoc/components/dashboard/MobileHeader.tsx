@@ -114,7 +114,7 @@ export function MobileHeader() {
                   {/* User Info */}
                   {session?.user && (
                     <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-purple-500/20 flex items-center justify-center ring-2 ring-primary/10">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-gray-500/20 flex items-center justify-center ring-2 ring-primary/10">
                         <span className="text-sm font-bold text-primary">
                           {session.user.name?.charAt(0) || "U"}
                         </span>
@@ -173,7 +173,7 @@ export function MobileHeader() {
                   </div>
 
                   {/* AI Usage Card */}
-                  <div className="mt-6 p-4 rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-purple-500/10 border border-primary/20">
+                  <div className="mt-6 p-4 rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-gray-500/10 border border-primary/20">
                     <div className="flex items-center gap-2 mb-3">
                       <div className="p-1.5 rounded-lg bg-primary/10">
                         <IconSparkles className="w-4 h-4 text-primary" />
@@ -187,7 +187,7 @@ export function MobileHeader() {
                       </div>
                       <div className="h-2 bg-muted/50 rounded-full overflow-hidden">
                         <div 
-                          className="h-full bg-gradient-to-r from-primary to-purple-500 rounded-full" 
+                          className="h-full bg-gradient-to-r from-primary to-gray-500 rounded-full" 
                           style={{ width: "65%" }} 
                         />
                       </div>

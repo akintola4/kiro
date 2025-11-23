@@ -135,7 +135,7 @@ export function AppSidebar() {
                   variant="ghost"
                   className="w-full justify-start gap-3 h-auto p-3 hover:bg-muted/50"
                 >
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/20 to-purple-500/20 flex items-center justify-center ring-2 ring-primary/10">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/20 to-gray-500/20 flex items-center justify-center ring-2 ring-primary/10">
                     <span className="text-sm font-bold text-primary">
                       {session.user.name?.charAt(0) || "U"}
                     </span>
