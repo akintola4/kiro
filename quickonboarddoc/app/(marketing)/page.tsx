@@ -176,7 +176,7 @@ export default function HomePage() {
               </Button>
             </Link>
             <a
-              href="https://www.youtube.com/@DevAkintola"
+              href="https://youtu.be/s3sGVz1iZ-4?si=6fXQJAMOJdLM8XRf"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Watch demo video on YouTube"
