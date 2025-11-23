@@ -182,7 +182,7 @@ export default function FAQPage() {
           </h1>
           <p className="text-lg text-muted-foreground">
             Everything you need to know about QuickOnboardDoc. Can't find what you're looking for?{" "}
-            <Link href="/dashboard/contact" className="text-primary hover:underline">
+            <Link href="/#contact" className="text-primary hover:underline">
               Contact us
             </Link>
           </p>
@@ -236,7 +236,7 @@ export default function FAQPage() {
                   Get Started Free
                 </Button>
               </Link>
-              <Link href="/dashboard/contact">
+              <Link href="/#contact">
                 <Button variant="outline" size="lg" className="w-full sm:w-auto">
                   Contact Support
                 </Button>
