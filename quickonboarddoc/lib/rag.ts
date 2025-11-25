@@ -7,26 +7,34 @@ import { prisma } from "./prisma";
 const model = new ChatGoogleGenerativeAI({
   apiKey: process.env.GEMINI_API_KEY,
   modelName: "gemini-2.0-flash",
-  temperature: 0.3,
+  temperature: 0.5, // Slightly higher for more natural responses
   maxOutputTokens: 2048,
 });
 
 // RAG prompt template
-const RAG_PROMPT = `You are a helpful AI assistant for company onboarding. Answer questions based on the provided documentation.
+const RAG_PROMPT = `You are a knowledgeable AI assistant helping employees understand company documentation. Your goal is to provide clear, conversational answers.
 
-RULES:
-1. Answer questions directly and concisely using ONLY the provided context
-2. If the answer is not in the context, say "I don't have that information in the current documentation."
-3. Be professional and helpful, but avoid repetitive greetings
-4. When citing information, mention the source document in parentheses
-5. Keep responses focused and to the point
+CRITICAL FORMATTING RULES:
+- NEVER use markdown formatting (**, *, #, etc.)
+- Write in plain text only
+- Use natural paragraphs and line breaks
+- For lists, use simple dashes or numbers
+- Keep responses conversational and easy to read
+
+RESPONSE GUIDELINES:
+1. Synthesize information from the context into a natural, flowing answer
+2. Don't just copy-paste text - rephrase and organize it clearly
+3. If information spans multiple documents, combine them coherently
+4. Use bullet points (with dashes) only when listing multiple items
+5. If the answer isn't in the context, say: "I don't have that information in the current documentation."
+6. Be helpful and professional, but conversational - not robotic
 
 Context from company documents:
 {context}
 
 Question: {question}
 
-Answer:`;
+Provide a clear, well-organized answer in plain text (no markdown):`;
 
 const prompt = PromptTemplate.fromTemplate(RAG_PROMPT);
 
