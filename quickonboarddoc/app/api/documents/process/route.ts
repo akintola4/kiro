@@ -121,6 +121,6 @@ export async function POST(req: Request) {
   }
 }
 
-// Hobby plan now supports 300s (5 minutes)
-export const maxDuration = 300;
+// Hobby plan max is 60 seconds (300s requires Pro plan)
+export const maxDuration = 60;
 export const dynamic = "force-dynamic";
