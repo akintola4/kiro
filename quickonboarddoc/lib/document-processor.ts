@@ -105,36 +105,56 @@ export async function processDocument(
   mimeType: string
 ): Promise<void> {
   try {
+    console.log(`📄 [EXTRACT] Starting text extraction for ${mimeType}`);
+    const extractStart = Date.now();
+    
     // Extract text based on file type
     let text: string;
     
     if (mimeType === "application/pdf") {
+      console.log(`📕 [PDF] Extracting text from PDF...`);
       text = await extractTextFromPDF(fileBuffer);
     } else if (
       mimeType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
       mimeType === "application/msword"
     ) {
+      console.log(`📘 [DOCX] Extracting text from Word document...`);
       text = await extractTextFromDOCX(fileBuffer);
     } else if (mimeType.startsWith("text/")) {
+      console.log(`📝 [TEXT] Reading plain text file...`);
       text = fileBuffer.toString("utf-8");
     } else {
       throw new Error(`Unsupported file type: ${mimeType}`);
     }
+    
+    console.log(`✅ [EXTRACT] Extracted ${text.length} characters in ${Date.now() - extractStart}ms`);
 
     // Split text into chunks
+    console.log(`✂️ [SPLIT] Splitting text into chunks...`);
+    const splitStart = Date.now();
     const chunks = await textSplitter.splitText(text);
-    console.log(`📊 Split into ${chunks.length} chunks`);
+    console.log(`✅ [SPLIT] Created ${chunks.length} chunks in ${Date.now() - splitStart}ms`);
 
     // Process chunks in batches to optimize performance
     const BATCH_SIZE = 10; // Process 10 chunks at a time
+    const totalBatches = Math.ceil(chunks.length / BATCH_SIZE);
+    
     for (let i = 0; i < chunks.length; i += BATCH_SIZE) {
+      const batchNum = Math.floor(i / BATCH_SIZE) + 1;
       const batchChunks = chunks.slice(i, i + BATCH_SIZE);
-      console.log(`🔄 Processing batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(chunks.length / BATCH_SIZE)}`);
+      
+      console.log(`🔄 [BATCH ${batchNum}/${totalBatches}] Processing ${batchChunks.length} chunks...`);
+      const batchStart = Date.now();
       
       // Generate embeddings for this batch
+      console.log(`🧠 [EMBED ${batchNum}] Generating embeddings...`);
+      const embedStart = Date.now();
       const batchEmbeddings = await embeddings.embedDocuments(batchChunks);
+      console.log(`✅ [EMBED ${batchNum}] Generated in ${Date.now() - embedStart}ms`);
       
       // Store this batch in database
+      console.log(`💾 [DB ${batchNum}] Storing chunks in database...`);
+      const dbStart = Date.now();
       await prisma.$transaction(
         batchChunks.map((chunk, batchIndex) =>
           prisma.documentChunk.create({
@@ -147,17 +167,20 @@ export async function processDocument(
           })
         )
       );
+      console.log(`✅ [DB ${batchNum}] Stored in ${Date.now() - dbStart}ms`);
+      console.log(`✅ [BATCH ${batchNum}] Completed in ${Date.now() - batchStart}ms`);
     }
 
     // Mark document as processed
+    console.log(`🏁 [FINALIZE] Marking document as processed...`);
     await prisma.document.update({
       where: { id: documentId },
       data: { processed: true },
     });
 
-    console.log(`✅ Processed document ${documentId}: ${chunks.length} chunks`);
+    console.log(`✅ [SUCCESS] Processed document ${documentId}: ${chunks.length} chunks total`);
   } catch (error) {
-    console.error("Document processing error:", error);
+    console.error("❌ [PROCESS ERROR] Document processing failed:", error);
     throw error;
   }
 }

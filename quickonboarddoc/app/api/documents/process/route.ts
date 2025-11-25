@@ -56,19 +56,27 @@ export async function POST(req: Request) {
     }
 
     try {
-      console.log(`🔄 Starting processing for: ${document.name}`);
+      console.log(`🔄 [PROCESS START] Document: ${document.name} (${document.id})`);
+      console.log(`📋 [PROCESS] MIME Type: ${document.mimeType}`);
+      console.log(`📏 [PROCESS] File Size: ${document.fileSize} bytes`);
       
       // Fetch file from Vercel Blob
+      console.log(`📥 [FETCH] Downloading from Blob: ${document.fileUrl}`);
+      const fetchStart = Date.now();
       const buffer = await fetchDocumentFromBlob(document.fileUrl);
+      console.log(`✅ [FETCH] Downloaded in ${Date.now() - fetchStart}ms`);
       
       // Process the document with timeout protection
+      console.log(`⚙️ [PROCESS] Starting text extraction and embedding...`);
       const startTime = Date.now();
       await processDocument(document.id, buffer, document.mimeType);
       const duration = Date.now() - startTime;
       
-      console.log(`✅ Document ${document.name} processed in ${duration}ms`);
+      console.log(`✅ [COMPLETE] Document ${document.name} processed in ${duration}ms`);
+      console.log(`📊 [STATS] Total time: ${Date.now() - fetchStart}ms`);
       
       // Send success notification
+      console.log(`🔔 [NOTIFY] Sending success notification`);
       await notifyDocumentProcessed({
         userId: session.user.id,
         workspaceId: document.workspaceId,
@@ -82,7 +90,8 @@ export async function POST(req: Request) {
         duration,
       });
     } catch (processError) {
-      console.error(`❌ Failed to process document ${document.name}:`, processError);
+      console.error(`❌ [ERROR] Failed to process document ${document.name}:`, processError);
+      console.error(`❌ [ERROR] Stack trace:`, processError instanceof Error ? processError.stack : 'No stack trace');
       
       // Mark as failed but don't send notification yet
       // User can retry via reprocess endpoint
