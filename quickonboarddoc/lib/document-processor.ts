@@ -5,6 +5,7 @@ import { writeFileSync, unlinkSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
 import pdfExtract from "pdf-text-extract";
+import mammoth from "mammoth";
 
 // Initialize embeddings model
 const embeddings = new GoogleGenerativeAIEmbeddings({
@@ -75,6 +76,27 @@ async function extractTextFromPDF(buffer: Buffer): Promise<string> {
 }
 
 /**
+ * Extract text from DOCX buffer using mammoth
+ */
+async function extractTextFromDOCX(buffer: Buffer): Promise<string> {
+  try {
+    const result = await mammoth.extractRawText({ buffer });
+    const text = result.value;
+    
+    console.log(`📄 Extracted ${text.length} characters from DOCX`);
+    
+    if (!text || text.trim().length === 0) {
+      throw new Error("No text content found in DOCX");
+    }
+    
+    return text;
+  } catch (error) {
+    console.error("DOCX extraction error:", error);
+    throw new Error(`Failed to extract text from DOCX: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+/**
  * Process a document: extract text, chunk it, create embeddings, and store
  */
 export async function processDocument(
@@ -88,6 +110,11 @@ export async function processDocument(
     
     if (mimeType === "application/pdf") {
       text = await extractTextFromPDF(fileBuffer);
+    } else if (
+      mimeType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+      mimeType === "application/msword"
+    ) {
+      text = await extractTextFromDOCX(fileBuffer);
     } else if (mimeType.startsWith("text/")) {
       text = fileBuffer.toString("utf-8");
     } else {

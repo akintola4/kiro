@@ -25,7 +25,7 @@ export default function StoragePage() {
   const [documentToDelete, setDocumentToDelete] = useState<{ id: string; name: string } | null>(null);
   const queryClient = useQueryClient();
 
-  const { data: documents, refetch } = useQuery({
+  const { data: documents } = useQuery({
     queryKey: ["documents"],
     queryFn: async () => {
       const response = await fetch("/api/documents");
@@ -122,9 +122,9 @@ export default function StoragePage() {
         </div>
       </div>
 
-      {/* Loading States */}
+      {/* Loading States - Full Screen Overlay */}
       {(uploading || deleting) && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div className="fixed inset-0 left-0 lg:left-0 bg-background/80 backdrop-blur-sm z-[100] flex items-center justify-center h-screen">
           <div className="flex flex-col items-center gap-4">
             <Ghost className="w-16 h-16 text-primary animate-bounce" />
             <p className="text-lg font-semibold">
@@ -147,14 +147,19 @@ export default function StoragePage() {
           </Card>
         ) : (
           documents?.documents?.map((doc: any) => (
-            <Card key={doc.id}>
+            <Card key={doc.id} className={!doc.processed ? "border-orange-500/50" : ""}>
               <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <IconFile className="w-4 h-4" />
-                  {doc.name}
+                <CardTitle className="text-base flex items-start gap-2">
+                  <IconFile className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  <span className="break-words line-clamp-2">{doc.name}</span>
                 </CardTitle>
-                <CardDescription>
-                  {new Date(doc.createdAt).toLocaleDateString()}
+                <CardDescription className="flex items-center gap-2">
+                  <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
+                  {!doc.processed && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400">
+                      Processing failed
+                    </span>
+                  )}
                 </CardDescription>
               </CardHeader>
               <CardContent>
