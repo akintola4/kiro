@@ -13,10 +13,10 @@ const embeddings = new GoogleGenerativeAIEmbeddings({
   modelName: "embedding-001",
 });
 
-// Text splitter configuration
+// Text splitter configuration - optimized for faster processing
 const textSplitter = new RecursiveCharacterTextSplitter({
-  chunkSize: 1000,
-  chunkOverlap: 200,
+  chunkSize: 800, // Reduced for faster processing
+  chunkOverlap: 150,
   separators: ["\n\n", "\n", ". ", " ", ""],
 });
 
@@ -123,23 +123,31 @@ export async function processDocument(
 
     // Split text into chunks
     const chunks = await textSplitter.splitText(text);
+    console.log(`📊 Split into ${chunks.length} chunks`);
 
-    // Generate embeddings for each chunk
-    const embeddingVectors = await embeddings.embedDocuments(chunks);
-
-    // Store chunks with embeddings in database
-    await prisma.$transaction(
-      chunks.map((chunk, index) =>
-        prisma.documentChunk.create({
-          data: {
-            documentId,
-            content: chunk,
-            embedding: JSON.stringify(embeddingVectors[index]),
-            chunkIndex: index,
-          },
-        })
-      )
-    );
+    // Process chunks in batches to avoid timeout
+    const BATCH_SIZE = 10;
+    for (let i = 0; i < chunks.length; i += BATCH_SIZE) {
+      const batchChunks = chunks.slice(i, i + BATCH_SIZE);
+      console.log(`🔄 Processing batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(chunks.length / BATCH_SIZE)}`);
+      
+      // Generate embeddings for this batch
+      const batchEmbeddings = await embeddings.embedDocuments(batchChunks);
+      
+      // Store this batch in database
+      await prisma.$transaction(
+        batchChunks.map((chunk, batchIndex) =>
+          prisma.documentChunk.create({
+            data: {
+              documentId,
+              content: chunk,
+              embedding: JSON.stringify(batchEmbeddings[batchIndex]),
+              chunkIndex: i + batchIndex,
+            },
+          })
+        )
+      );
+    }
 
     // Mark document as processed
     await prisma.document.update({

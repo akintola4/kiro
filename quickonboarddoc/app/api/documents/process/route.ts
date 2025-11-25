@@ -106,5 +106,5 @@ export async function POST(req: Request) {
   }
 }
 
-export const maxDuration = 60; // 60 seconds for Pro plan, 10 for Hobby
+export const maxDuration = 300; // 5 minutes max (requires Pro plan)
 export const dynamic = "force-dynamic";
