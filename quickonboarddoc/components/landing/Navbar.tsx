@@ -68,7 +68,7 @@ export function Navbar() {
 
         {/* Right - Actions */}
         <div className="flex gap-2 items-center ml-auto">
-          {/* <ModeToggle /> */}
+          <ModeToggle />
           {status === "authenticated" ? (
             <Link href="/dashboard/home">
               <Button size="sm" className="rounded-full">
