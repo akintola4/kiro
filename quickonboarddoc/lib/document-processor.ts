@@ -3,8 +3,8 @@ import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import { prisma } from "./prisma";
 import mammoth from "mammoth";
 
-// @ts-ignore - pdf-parse has issues with ESM imports
-const pdfParse = require("pdf-parse");
+// @ts-ignore - pdf-parse-fork doesn't have types
+import pdfParse from "pdf-parse-fork";
 
 // Initialize embeddings model
 const embeddings = new GoogleGenerativeAIEmbeddings({
