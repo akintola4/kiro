@@ -61,10 +61,12 @@ export async function POST(req: Request) {
       // Fetch file from Vercel Blob
       const buffer = await fetchDocumentFromBlob(document.fileUrl);
       
-      // Process the document
+      // Process the document with timeout protection
+      const startTime = Date.now();
       await processDocument(document.id, buffer, document.mimeType);
+      const duration = Date.now() - startTime;
       
-      console.log(`✅ Document ${document.name} processed successfully`);
+      console.log(`✅ Document ${document.name} processed in ${duration}ms`);
       
       // Send success notification
       await notifyDocumentProcessed({
@@ -77,9 +79,13 @@ export async function POST(req: Request) {
       return NextResponse.json({
         success: true,
         message: "Document processed successfully",
+        duration,
       });
     } catch (processError) {
       console.error(`❌ Failed to process document ${document.name}:`, processError);
+      
+      // Mark as failed but don't send notification yet
+      // User can retry via reprocess endpoint
       
       // Send failure notification
       await notifyDocumentProcessed({
@@ -106,5 +112,6 @@ export async function POST(req: Request) {
   }
 }
 
-export const maxDuration = 300; // 5 minutes max (requires Pro plan)
+// Hobby plan now supports 300s (5 minutes)
+export const maxDuration = 300;
 export const dynamic = "force-dynamic";

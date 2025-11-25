@@ -13,10 +13,10 @@ const embeddings = new GoogleGenerativeAIEmbeddings({
   modelName: "embedding-001",
 });
 
-// Text splitter configuration - optimized for faster processing
+// Text splitter configuration - optimized for quality and performance
 const textSplitter = new RecursiveCharacterTextSplitter({
-  chunkSize: 800, // Reduced for faster processing
-  chunkOverlap: 150,
+  chunkSize: 1000, // Good balance for context and performance
+  chunkOverlap: 200,
   separators: ["\n\n", "\n", ". ", " ", ""],
 });
 
@@ -125,8 +125,8 @@ export async function processDocument(
     const chunks = await textSplitter.splitText(text);
     console.log(`📊 Split into ${chunks.length} chunks`);
 
-    // Process chunks in batches to avoid timeout
-    const BATCH_SIZE = 10;
+    // Process chunks in batches to optimize performance
+    const BATCH_SIZE = 10; // Process 10 chunks at a time
     for (let i = 0; i < chunks.length; i += BATCH_SIZE) {
       const batchChunks = chunks.slice(i, i + BATCH_SIZE);
       console.log(`🔄 Processing batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(chunks.length / BATCH_SIZE)}`);
