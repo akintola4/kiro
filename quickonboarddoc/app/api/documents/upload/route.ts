@@ -1,44 +1,10 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { processDocument } from "@/lib/document-processor";
+import { processDocument, fetchDocumentFromBlob } from "@/lib/document-processor";
 import { notifyDocumentProcessed } from "@/lib/notifications";
 import { put } from "@vercel/blob";
 import { getCurrentWorkspace } from "@/lib/workspace-context";
-
-// Async processing function that runs in background
-async function processDocumentAsync(
-  documentId: string,
-  buffer: Buffer,
-  mimeType: string,
-  userId: string,
-  workspaceId: string,
-  documentName: string
-) {
-  try {
-    console.log(`🔄 Starting background processing for: ${documentName}`);
-    await processDocument(documentId, buffer, mimeType);
-    console.log(`✅ Document ${documentName} processed successfully`);
-    
-    // Send success notification
-    await notifyDocumentProcessed({
-      userId,
-      workspaceId,
-      documentName,
-      success: true,
-    });
-  } catch (processError) {
-    console.error(`❌ Failed to process document ${documentName}:`, processError);
-    
-    // Send failure notification
-    await notifyDocumentProcessed({
-      userId,
-      workspaceId,
-      documentName,
-      success: false,
-    });
-  }
-}
 
 export async function POST(req: Request) {
   try {
@@ -99,15 +65,12 @@ export async function POST(req: Request) {
 
     console.log(`📄 Document record created: ${document.id}`);
 
-    // Start processing asynchronously (don't await)
-    // This prevents timeout on large files
-    processDocumentAsync(document.id, buffer, file.type, session.user.id, workspace.id, document.name);
-
-    // Return immediately
+    // Return immediately - client will trigger processing via separate endpoint
     return NextResponse.json(
       {
         document,
-        message: "Document uploaded successfully. Processing in background...",
+        message: "Document uploaded successfully. Processing will start shortly...",
+        needsProcessing: true,
       },
       { status: 201 }
     );

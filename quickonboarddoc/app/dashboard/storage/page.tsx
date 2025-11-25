@@ -36,6 +36,12 @@ export default function StoragePage() {
       // Auto-refresh every 3 seconds if there are unprocessed documents
       const data = query.state.data as any;
       const hasUnprocessed = data?.documents?.some((doc: any) => !doc.processed);
+      
+      // Also refresh notifications when checking documents
+      if (hasUnprocessed) {
+        queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      }
+      
       return hasUnprocessed ? 3000 : false;
     },
   });
@@ -58,10 +64,23 @@ export default function StoragePage() {
         throw new Error("Upload failed");
       }
 
+      const data = await response.json();
       toast.success("File uploaded successfully!");
+      
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
+
+      // Trigger processing in background
+      if (data.needsProcessing && data.document?.id) {
+        fetch("/api/documents/process", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ documentId: data.document.id }),
+        }).catch((err) => {
+          console.error("Failed to trigger processing:", err);
+        });
+      }
     } catch (error) {
       toast.error("Failed to upload file");
     } finally {

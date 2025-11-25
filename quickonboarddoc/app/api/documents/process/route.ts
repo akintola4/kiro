@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { processDocument } from "@/lib/document-processor";
-import { readFile } from "fs/promises";
-import { join } from "path";
+import { processDocument, fetchDocumentFromBlob } from "@/lib/document-processor";
+import { notifyDocumentProcessed } from "@/lib/notifications";
 
 export async function POST(req: Request) {
   try {
@@ -22,13 +21,15 @@ export async function POST(req: Request) {
       );
     }
 
-    // Get document
+    // Get the document
     const document = await prisma.document.findUnique({
       where: { id: documentId },
       include: {
         workspace: {
           include: {
-            members: true,
+            members: {
+              where: { userId: session.user.id },
+            },
           },
         },
       },
@@ -41,80 +42,69 @@ export async function POST(req: Request) {
       );
     }
 
-    // Check if user has access
-    const isMember = document.workspace.members.some(
-      (m) => m.userId === session.user.id
-    );
-
-    if (!isMember) {
+    // Verify user has access
+    if (document.workspace.members.length === 0) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Check if already processed
+    // Skip if already processed
     if (document.processed) {
       return NextResponse.json({
+        success: true,
         message: "Document already processed",
-        processed: true,
       });
     }
 
-    // For now, return a message that processing is in progress
-    // In production, you would fetch the file from storage and process it
-    return NextResponse.json({
-      message: "Document processing is in progress. This is a demo - in production, files would be fetched from cloud storage and processed.",
-      processed: false,
-      note: "To fully implement: 1) Store files in cloud storage (S3, etc.), 2) Fetch file buffer, 3) Call processDocument()",
-    });
-  } catch (error) {
-    console.error("Process document error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
-  }
-}
-
-// Get processing status for all documents
-export async function GET() {
-  try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    try {
+      console.log(`🔄 Starting processing for: ${document.name}`);
+      
+      // Fetch file from Vercel Blob
+      const buffer = await fetchDocumentFromBlob(document.fileUrl);
+      
+      // Process the document
+      await processDocument(document.id, buffer, document.mimeType);
+      
+      console.log(`✅ Document ${document.name} processed successfully`);
+      
+      // Send success notification
+      await notifyDocumentProcessed({
+        userId: session.user.id,
+        workspaceId: document.workspaceId,
+        documentName: document.name,
+        success: true,
+      });
+      
+      return NextResponse.json({
+        success: true,
+        message: "Document processed successfully",
+      });
+    } catch (processError) {
+      console.error(`❌ Failed to process document ${document.name}:`, processError);
+      
+      // Send failure notification
+      await notifyDocumentProcessed({
+        userId: session.user.id,
+        workspaceId: document.workspaceId,
+        documentName: document.name,
+        success: false,
+      });
+      
+      return NextResponse.json(
+        {
+          error: "Processing failed",
+          details: processError instanceof Error ? processError.message : "Unknown error",
+        },
+        { status: 500 }
+      );
     }
-
-    const documents = await prisma.document.findMany({
-      where: {
-        workspace: {
-          members: {
-            some: {
-              userId: session.user.id,
-            },
-          },
-        },
-      },
-      include: {
-        _count: {
-          select: {
-            chunks: true,
-          },
-        },
-      },
-    });
-
-    return NextResponse.json({
-      documents: documents.map((doc) => ({
-        id: doc.id,
-        name: doc.name,
-        processed: doc.processed,
-        chunkCount: doc._count.chunks,
-      })),
-    });
   } catch (error) {
-    console.error("Get processing status error:", error);
+    console.error("Process error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
     );
   }
 }
+
+export const maxDuration = 60; // 60 seconds for Pro plan, 10 for Hobby
+export const dynamic = "force-dynamic";
