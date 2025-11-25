@@ -32,6 +32,12 @@ export default function StoragePage() {
       if (!response.ok) throw new Error("Failed to fetch documents");
       return response.json();
     },
+    refetchInterval: (query) => {
+      // Auto-refresh every 3 seconds if there are unprocessed documents
+      const data = query.state.data as any;
+      const hasUnprocessed = data?.documents?.some((doc: any) => !doc.processed);
+      return hasUnprocessed ? 3000 : false;
+    },
   });
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -147,7 +153,7 @@ export default function StoragePage() {
           </Card>
         ) : (
           documents?.documents?.map((doc: any) => (
-            <Card key={doc.id} className={!doc.processed ? "border-orange-500/50" : ""}>
+            <Card key={doc.id} className={doc.processed ? "border-gray-500/20" : "border-blue-500/50"}>
               <CardHeader>
                 <CardTitle className="text-base flex items-start gap-2">
                   <IconFile className="w-4 h-4 flex-shrink-0 mt-0.5" />
@@ -155,9 +161,13 @@ export default function StoragePage() {
                 </CardTitle>
                 <CardDescription className="flex items-center gap-2">
                   <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
-                  {!doc.processed && (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400">
-                      Processing failed
+                  {doc.processed ? (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/10 text-green-600 dark:text-green-400">
+                      ✓ Ready
+                    </span>
+                  ) : (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 animate-pulse">
+                      Processing...
                     </span>
                   )}
                 </CardDescription>

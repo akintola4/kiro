@@ -6,6 +6,40 @@ import { notifyDocumentProcessed } from "@/lib/notifications";
 import { put } from "@vercel/blob";
 import { getCurrentWorkspace } from "@/lib/workspace-context";
 
+// Async processing function that runs in background
+async function processDocumentAsync(
+  documentId: string,
+  buffer: Buffer,
+  mimeType: string,
+  userId: string,
+  workspaceId: string,
+  documentName: string
+) {
+  try {
+    console.log(`🔄 Starting background processing for: ${documentName}`);
+    await processDocument(documentId, buffer, mimeType);
+    console.log(`✅ Document ${documentName} processed successfully`);
+    
+    // Send success notification
+    await notifyDocumentProcessed({
+      userId,
+      workspaceId,
+      documentName,
+      success: true,
+    });
+  } catch (processError) {
+    console.error(`❌ Failed to process document ${documentName}:`, processError);
+    
+    // Send failure notification
+    await notifyDocumentProcessed({
+      userId,
+      workspaceId,
+      documentName,
+      success: false,
+    });
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const session = await auth();
@@ -65,50 +99,18 @@ export async function POST(req: Request) {
 
     console.log(`📄 Document record created: ${document.id}`);
 
-    // Process document immediately (extract text, chunk, embed)
-    try {
-      console.log(`🔄 Starting processing for: ${document.name}`);
-      await processDocument(document.id, buffer, file.type);
-      console.log(`✅ Document ${document.name} processed successfully`);
-      
-      // Send success notification
-      await notifyDocumentProcessed({
-        userId: session.user.id,
-        workspaceId: workspace.id,
-        documentName: document.name,
-        success: true,
-      });
-      
-      return NextResponse.json(
-        {
-          document: {
-            ...document,
-            processed: true,
-          },
-          message: "Document uploaded and processed successfully",
-        },
-        { status: 201 }
-      );
-    } catch (processError) {
-      console.error(`❌ Failed to process document ${document.name}:`, processError);
-      
-      // Send failure notification
-      await notifyDocumentProcessed({
-        userId: session.user.id,
-        workspaceId: workspace.id,
-        documentName: document.name,
-        success: false,
-      });
-      
-      return NextResponse.json(
-        {
-          document,
-          message: "Document uploaded but processing failed. Please try re-uploading.",
-          error: processError instanceof Error ? processError.message : "Processing failed",
-        },
-        { status: 201 }
-      );
-    }
+    // Start processing asynchronously (don't await)
+    // This prevents timeout on large files
+    processDocumentAsync(document.id, buffer, file.type, session.user.id, workspace.id, document.name);
+
+    // Return immediately
+    return NextResponse.json(
+      {
+        document,
+        message: "Document uploaded successfully. Processing in background...",
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Upload error:", error);
     return NextResponse.json(
