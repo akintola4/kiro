@@ -1,11 +1,10 @@
 import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import { prisma } from "./prisma";
-import { writeFileSync, unlinkSync } from "fs";
-import { join } from "path";
-import { tmpdir } from "os";
-import pdfExtract from "pdf-text-extract";
 import mammoth from "mammoth";
+
+// @ts-ignore - pdf-parse has issues with ESM imports
+const pdfParse = require("pdf-parse");
 
 // Initialize embeddings model
 const embeddings = new GoogleGenerativeAIEmbeddings({
@@ -21,58 +20,24 @@ const textSplitter = new RecursiveCharacterTextSplitter({
 });
 
 /**
- * Extract text from PDF buffer using pdf-text-extract
+ * Extract text from PDF buffer using pdf-parse (works on Vercel)
  */
 async function extractTextFromPDF(buffer: Buffer): Promise<string> {
-  let tempFilePath: string | null = null;
-  
-  return new Promise((resolve, reject) => {
-    try {
-      // Create a temporary file
-      tempFilePath = join(tmpdir(), `pdf-${Date.now()}.pdf`);
-      writeFileSync(tempFilePath, buffer);
-      
-      // Extract text using pdftotext
-      pdfExtract(tempFilePath, (err: Error | null, pages: string[]) => {
-        // Clean up temp file
-        if (tempFilePath) {
-          try {
-            unlinkSync(tempFilePath);
-          } catch (e) {
-            // Ignore cleanup errors
-          }
-        }
-        
-        if (err) {
-          console.error("PDF extraction error:", err);
-          reject(new Error(`Failed to extract text from PDF: ${err.message}`));
-          return;
-        }
-        
-        const fullText = pages.join("\n\n");
-        
-        console.log(`📄 Extracted ${pages.length} pages, ${fullText.length} characters`);
-        
-        if (!fullText || fullText.trim().length === 0) {
-          reject(new Error("No text content found in PDF"));
-          return;
-        }
-        
-        resolve(fullText);
-      });
-    } catch (error) {
-      // Clean up temp file on error
-      if (tempFilePath) {
-        try {
-          unlinkSync(tempFilePath);
-        } catch (e) {
-          // Ignore cleanup errors
-        }
-      }
-      console.error("PDF extraction error:", error);
-      reject(new Error(`Failed to extract text from PDF: ${error instanceof Error ? error.message : 'Unknown error'}`));
+  try {
+    const data = await pdfParse(buffer);
+    const text = data.text;
+    
+    console.log(`📄 Extracted ${data.numpages} pages, ${text.length} characters`);
+    
+    if (!text || text.trim().length === 0) {
+      throw new Error("No text content found in PDF");
     }
-  });
+    
+    return text;
+  } catch (error) {
+    console.error("PDF extraction error:", error);
+    throw new Error(`Failed to extract text from PDF: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 }
 
 /**
