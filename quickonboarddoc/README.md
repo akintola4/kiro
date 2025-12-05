@@ -6,7 +6,9 @@ AI-powered RAG chatbot for new hire onboarding. Get instant, accurate answers fr
 - **Username**: kirotester@tester.com
 - **Password**: KiroTester@@27
 
+for more info for testing go to /.kiro/ kiro-team-onboarding-guide.md for the instructions 
 ---
+
 
 ## Tech Stack
 
