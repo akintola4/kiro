@@ -2,6 +2,12 @@
 
 AI-powered RAG chatbot for new hire onboarding. Get instant, accurate answers from your company documentation with the Crypt Keeper aesthetic.
 
+## Test Account Credentials
+- **Username**: kirotester@tester.com
+- **Password**: KiroTester@@27
+
+---
+
 ## Tech Stack
 
 - **Framework**: Next.js 15 (App Router)
