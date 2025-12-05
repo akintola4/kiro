@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { IconFile, IconTrash, IconUpload } from "@tabler/icons-react";
+import { IconFile, IconTrash, IconUpload, IconEye, IconDownload } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { Ghost } from "lucide-react";
 import {
@@ -196,14 +196,56 @@ export default function StoragePage() {
                   <span className="text-sm text-muted-foreground">
                     {(doc.fileSize / 1024).toFixed(2)} KB
                   </span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => openDeleteDialog({ id: doc.id, name: doc.name })}
-                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                  >
-                    <IconTrash className="w-4 h-4" />
-                  </Button>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        // For PDFs, open in new tab. For DOCX, download
+                        if (doc.mimeType === 'application/pdf') {
+                          window.open(doc.fileUrl, '_blank', 'noopener,noreferrer');
+                        } else {
+                          // For DOCX and other files, trigger download
+                          const link = document.createElement('a');
+                          link.href = doc.fileUrl;
+                          link.target = '_blank';
+                          link.rel = 'noopener noreferrer';
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                        }
+                      }}
+                      className="hover:bg-primary/10"
+                      title={doc.mimeType === 'application/pdf' ? 'Preview PDF' : 'Open document'}
+                    >
+                      <IconEye className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        const link = document.createElement('a');
+                        link.href = doc.fileUrl;
+                        link.download = doc.name;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                      }}
+                      className="hover:bg-primary/10"
+                      title="Download document"
+                    >
+                      <IconDownload className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => openDeleteDialog({ id: doc.id, name: doc.name })}
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                      title="Delete document"
+                    >
+                      <IconTrash className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
